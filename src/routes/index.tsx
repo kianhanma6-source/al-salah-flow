@@ -62,7 +62,7 @@ function LoginPage() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 size-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/25 ring-orbit" />
       <div className="pointer-events-none absolute left-1/2 top-1/2 size-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent/25 ring-orbit" />
 
-      <div className="w-full max-w-md tilt-card">
+      <div className="w-full max-w-md [perspective:1200px]">
         <form
           onSubmit={submit}
           className="glass rounded-2xl p-7 shadow-[var(--shadow-3d)] backdrop-blur-2xl"
