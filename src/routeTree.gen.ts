@@ -15,7 +15,9 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
+import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AccomplishmentRouteImport } from './routes/accomplishment'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -49,9 +51,19 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrandingRoute = BrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoardRoute = BoardRouteImport.update({
   id: '/board',
   path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccomplishmentRoute = AccomplishmentRouteImport.update({
@@ -68,7 +80,9 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
@@ -79,7 +93,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
@@ -91,7 +107,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
@@ -104,7 +122,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accomplishment'
+    | '/backup'
     | '/board'
+    | '/branding'
     | '/dashboard'
     | '/installation'
     | '/logistic'
@@ -115,7 +135,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accomplishment'
+    | '/backup'
     | '/board'
+    | '/branding'
     | '/dashboard'
     | '/installation'
     | '/logistic'
@@ -126,7 +148,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accomplishment'
+    | '/backup'
     | '/board'
+    | '/branding'
     | '/dashboard'
     | '/installation'
     | '/logistic'
@@ -138,7 +162,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccomplishmentRoute: typeof AccomplishmentRoute
+  BackupRoute: typeof BackupRoute
   BoardRoute: typeof BoardRoute
+  BrandingRoute: typeof BrandingRoute
   DashboardRoute: typeof DashboardRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
@@ -191,11 +217,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/branding': {
+      id: '/branding'
+      path: '/branding'
+      fullPath: '/branding'
+      preLoaderRoute: typeof BrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/board': {
       id: '/board'
       path: '/board'
       fullPath: '/board'
       preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accomplishment': {
@@ -218,7 +258,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccomplishmentRoute: AccomplishmentRoute,
+  BackupRoute: BackupRoute,
   BoardRoute: BoardRoute,
+  BrandingRoute: BrandingRoute,
   DashboardRoute: DashboardRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
