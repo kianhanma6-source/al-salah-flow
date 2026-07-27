@@ -65,8 +65,9 @@ function LoginPage() {
       <div className="w-full max-w-md [perspective:1200px]">
         <form
           onSubmit={submit}
-          className="glass rounded-2xl p-7 shadow-[var(--shadow-3d)] backdrop-blur-2xl"
+          className="glass rounded-2xl p-7 shadow-[var(--shadow-3d)] backdrop-blur-2xl transition-transform duration-500 [transform:rotateX(6deg)_rotateY(-4deg)] hover:[transform:rotateX(0deg)_rotateY(0deg)_translateY(-6px)]"
         >
+
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="relative">
               <div className="absolute -inset-3 rounded-full bg-primary/25 blur-2xl pulse-glow" />
