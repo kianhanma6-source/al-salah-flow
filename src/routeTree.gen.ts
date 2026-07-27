@@ -9,13 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WmReturnedRouteImport } from './routes/wm-returned'
+import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as LogisticRouteImport } from './routes/logistic'
+import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WmReturnedRoute = WmReturnedRouteImport.update({
+  id: '/wm-returned',
+  path: '/wm-returned',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WmDeploymentRoute = WmDeploymentRouteImport.update({
+  id: '/wm-deployment',
+  path: '/wm-deployment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogisticRoute = LogisticRouteImport.update({
   id: '/logistic',
   path: '/logistic',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallationRoute = InstallationRouteImport.update({
+  id: '/installation',
+  path: '/installation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoardRoute = BoardRouteImport.update({
@@ -32,40 +50,92 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/board': typeof BoardRoute
+  '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/board': typeof BoardRoute
+  '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/board': typeof BoardRoute
+  '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/board' | '/logistic'
+  fullPaths:
+    | '/'
+    | '/board'
+    | '/installation'
+    | '/logistic'
+    | '/wm-deployment'
+    | '/wm-returned'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/board' | '/logistic'
-  id: '__root__' | '/' | '/board' | '/logistic'
+  to:
+    | '/'
+    | '/board'
+    | '/installation'
+    | '/logistic'
+    | '/wm-deployment'
+    | '/wm-returned'
+  id:
+    | '__root__'
+    | '/'
+    | '/board'
+    | '/installation'
+    | '/logistic'
+    | '/wm-deployment'
+    | '/wm-returned'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BoardRoute: typeof BoardRoute
+  InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
+  WmDeploymentRoute: typeof WmDeploymentRoute
+  WmReturnedRoute: typeof WmReturnedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wm-returned': {
+      id: '/wm-returned'
+      path: '/wm-returned'
+      fullPath: '/wm-returned'
+      preLoaderRoute: typeof WmReturnedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wm-deployment': {
+      id: '/wm-deployment'
+      path: '/wm-deployment'
+      fullPath: '/wm-deployment'
+      preLoaderRoute: typeof WmDeploymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/logistic': {
       id: '/logistic'
       path: '/logistic'
       fullPath: '/logistic'
       preLoaderRoute: typeof LogisticRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/installation': {
+      id: '/installation'
+      path: '/installation'
+      fullPath: '/installation'
+      preLoaderRoute: typeof InstallationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/board': {
@@ -88,7 +158,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BoardRoute: BoardRoute,
+  InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
+  WmDeploymentRoute: WmDeploymentRoute,
+  WmReturnedRoute: WmReturnedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
