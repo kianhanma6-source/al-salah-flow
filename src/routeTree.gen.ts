@@ -9,8 +9,74 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WmReturnedRouteImport } from './routes/wm-returned'
+import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as LogisticRouteImport } from './routes/logistic'
+import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BrandingRouteImport } from './routes/branding'
+import { Route as BoardRouteImport } from './routes/board'
+import { Route as BackupRouteImport } from './routes/backup'
+import { Route as AccomplishmentRouteImport } from './routes/accomplishment'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WmReturnedRoute = WmReturnedRouteImport.update({
+  id: '/wm-returned',
+  path: '/wm-returned',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WmDeploymentRoute = WmDeploymentRouteImport.update({
+  id: '/wm-deployment',
+  path: '/wm-deployment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogisticRoute = LogisticRouteImport.update({
+  id: '/logistic',
+  path: '/logistic',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallationRoute = InstallationRouteImport.update({
+  id: '/installation',
+  path: '/installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandingRoute = BrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccomplishmentRoute = AccomplishmentRouteImport.update({
+  id: '/accomplishment',
+  path: '/accomplishment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +85,186 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
+  '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
+  '/dashboard': typeof DashboardRoute
+  '/installation': typeof InstallationRoute
+  '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/users': typeof UsersRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
+  '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
+  '/dashboard': typeof DashboardRoute
+  '/installation': typeof InstallationRoute
+  '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/users': typeof UsersRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
+  '/backup': typeof BackupRoute
+  '/board': typeof BoardRoute
+  '/branding': typeof BrandingRoute
+  '/dashboard': typeof DashboardRoute
+  '/installation': typeof InstallationRoute
+  '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/users': typeof UsersRoute
+  '/wm-deployment': typeof WmDeploymentRoute
+  '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accomplishment'
+    | '/backup'
+    | '/board'
+    | '/branding'
+    | '/dashboard'
+    | '/installation'
+    | '/logistic'
+    | '/sitemap.xml'
+    | '/users'
+    | '/wm-deployment'
+    | '/wm-returned'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/accomplishment'
+    | '/backup'
+    | '/board'
+    | '/branding'
+    | '/dashboard'
+    | '/installation'
+    | '/logistic'
+    | '/sitemap.xml'
+    | '/users'
+    | '/wm-deployment'
+    | '/wm-returned'
+  id:
+    | '__root__'
+    | '/'
+    | '/accomplishment'
+    | '/backup'
+    | '/board'
+    | '/branding'
+    | '/dashboard'
+    | '/installation'
+    | '/logistic'
+    | '/sitemap.xml'
+    | '/users'
+    | '/wm-deployment'
+    | '/wm-returned'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccomplishmentRoute: typeof AccomplishmentRoute
+  BackupRoute: typeof BackupRoute
+  BoardRoute: typeof BoardRoute
+  BrandingRoute: typeof BrandingRoute
+  DashboardRoute: typeof DashboardRoute
+  InstallationRoute: typeof InstallationRoute
+  LogisticRoute: typeof LogisticRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  UsersRoute: typeof UsersRoute
+  WmDeploymentRoute: typeof WmDeploymentRoute
+  WmReturnedRoute: typeof WmReturnedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wm-returned': {
+      id: '/wm-returned'
+      path: '/wm-returned'
+      fullPath: '/wm-returned'
+      preLoaderRoute: typeof WmReturnedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wm-deployment': {
+      id: '/wm-deployment'
+      path: '/wm-deployment'
+      fullPath: '/wm-deployment'
+      preLoaderRoute: typeof WmDeploymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logistic': {
+      id: '/logistic'
+      path: '/logistic'
+      fullPath: '/logistic'
+      preLoaderRoute: typeof LogisticRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/installation': {
+      id: '/installation'
+      path: '/installation'
+      fullPath: '/installation'
+      preLoaderRoute: typeof InstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/branding': {
+      id: '/branding'
+      path: '/branding'
+      fullPath: '/branding'
+      preLoaderRoute: typeof BrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accomplishment': {
+      id: '/accomplishment'
+      path: '/accomplishment'
+      fullPath: '/accomplishment'
+      preLoaderRoute: typeof AccomplishmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +277,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccomplishmentRoute: AccomplishmentRoute,
+  BackupRoute: BackupRoute,
+  BoardRoute: BoardRoute,
+  BrandingRoute: BrandingRoute,
+  DashboardRoute: DashboardRoute,
+  InstallationRoute: InstallationRoute,
+  LogisticRoute: LogisticRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  UsersRoute: UsersRoute,
+  WmDeploymentRoute: WmDeploymentRoute,
+  WmReturnedRoute: WmReturnedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
