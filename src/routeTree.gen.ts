@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BoardRouteImport } from './routes/board'
+import { Route as AccomplishmentRouteImport } from './routes/accomplishment'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WmReturnedRoute = WmReturnedRouteImport.update({
@@ -26,6 +29,11 @@ const WmDeploymentRoute = WmDeploymentRouteImport.update({
   path: '/wm-deployment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogisticRoute = LogisticRouteImport.update({
   id: '/logistic',
   path: '/logistic',
@@ -36,9 +44,19 @@ const InstallationRoute = InstallationRouteImport.update({
   path: '/installation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoardRoute = BoardRouteImport.update({
   id: '/board',
   path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccomplishmentRoute = AccomplishmentRouteImport.update({
+  id: '/accomplishment',
+  path: '/accomplishment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,26 +67,35 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
   '/board': typeof BoardRoute
+  '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
   '/board': typeof BoardRoute
+  '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/accomplishment': typeof AccomplishmentRoute
   '/board': typeof BoardRoute
+  '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
 }
@@ -76,34 +103,46 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/accomplishment'
     | '/board'
+    | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/users'
     | '/wm-deployment'
     | '/wm-returned'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/accomplishment'
     | '/board'
+    | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/users'
     | '/wm-deployment'
     | '/wm-returned'
   id:
     | '__root__'
     | '/'
+    | '/accomplishment'
     | '/board'
+    | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/users'
     | '/wm-deployment'
     | '/wm-returned'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccomplishmentRoute: typeof AccomplishmentRoute
   BoardRoute: typeof BoardRoute
+  DashboardRoute: typeof DashboardRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
+  UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
   WmReturnedRoute: typeof WmReturnedRoute
 }
@@ -124,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WmDeploymentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/logistic': {
       id: '/logistic'
       path: '/logistic'
@@ -138,11 +184,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstallationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/board': {
       id: '/board'
       path: '/board'
       fullPath: '/board'
       preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accomplishment': {
+      id: '/accomplishment'
+      path: '/accomplishment'
+      fullPath: '/accomplishment'
+      preLoaderRoute: typeof AccomplishmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,9 +217,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccomplishmentRoute: AccomplishmentRoute,
   BoardRoute: BoardRoute,
+  DashboardRoute: DashboardRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
+  UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,
   WmReturnedRoute: WmReturnedRoute,
 }
