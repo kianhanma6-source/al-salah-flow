@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -34,6 +35,11 @@ const WmDeploymentRoute = WmDeploymentRouteImport.update({
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogisticRoute = LogisticRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/installation'
     | '/logistic'
+    | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
   WmReturnedRoute: typeof WmReturnedRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logistic': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,
   WmReturnedRoute: WmReturnedRoute,
