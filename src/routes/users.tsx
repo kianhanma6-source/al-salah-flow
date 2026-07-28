@@ -52,13 +52,14 @@ function UsersPage() {
     .sort((a, b) => b.username.localeCompare(a.username));
 
   const save = () => {
-    if (!form.username.trim() || !form.password.trim()) return toast.error("Username and password are required.");
+    if (!form.username.trim()) return toast.error("Username is required.");
+    if (!form.id && !form.password.trim()) return toast.error("Password is required.");
     setDB((d) => {
       const list = [...d.users];
       if (form.id) {
         const i = list.findIndex((u) => u.id === form.id);
         if (list[i].locked && !isProgrammer) return d;
-        list[i] = form;
+        list[i] = { ...form, password: form.password.trim() ? form.password : list[i].password };
       } else list.push({ ...form, id: uid() });
       return { ...d, users: list };
     });
@@ -99,9 +100,20 @@ function UsersPage() {
             <Field label="Username">
               <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
             </Field>
-            <Field label="Password">
-              <Input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-            </Field>
+            {isProgrammer ? (
+              <Field label="Password">
+                <Input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+              </Field>
+            ) : (
+              <Field label="Password">
+                <Input
+                  type="password"
+                  value={form.id ? "" : form.password}
+                  placeholder={form.id ? "Hidden — leave blank to keep" : "Set a password"}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+              </Field>
+            )}
             <Field label="Name">
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </Field>
@@ -155,7 +167,7 @@ function UsersPage() {
             u.role,
             <div className="flex gap-1">
               {writable && (!u.locked || isProgrammer) && (
-                <button className="btn-ghost-3d px-2" onClick={() => setForm(u)}>
+                <button className="btn-ghost-3d px-2" onClick={() => setForm(isProgrammer ? u : { ...u, password: "" })}>
                   <Pencil className="size-3.5" />
                 </button>
               )}
