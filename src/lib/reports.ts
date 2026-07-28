@@ -21,12 +21,15 @@ export function exportAllExcel(db: DB = getDB()) {
       name.slice(0, 30),
     );
   add("Users", db.users.map(({ password: _p, ...u }) => u) as Row[]);
+  add("Branding", [db.branding as unknown as Row]);
   (Object.keys(db.modules) as (keyof DB["modules"])[]).forEach((k) => {
-    add(`${k}-inventory`, db.modules[k].inventory.map(({ photo: _x, ...r }) => r) as Row[]);
+    // photo kept as base64 string so pictures survive export/import
+    add(`${k}-inventory`, db.modules[k].inventory as unknown as Row[]);
     add(
       `${k}-deployment`,
       db.modules[k].deployment.flatMap((d) =>
-        d.lines.map(({ photo: _x, ...l }) => ({
+        d.lines.map((l) => ({
+          id: d.id,
           transNo: d.transNo,
           date: d.date,
           name: d.name,
@@ -36,7 +39,7 @@ export function exportAllExcel(db: DB = getDB()) {
       ) as Row[],
     );
   });
-  add("accomplishment", db.accomplishment.map(({ photo: _x, ...r }) => r) as Row[]);
+  add("accomplishment", db.accomplishment as unknown as Row[]);
   XLSX.writeFile(wb, `AHAS_ALL_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
@@ -52,10 +55,50 @@ export function importAllExcel(file: File) {
         const users = get("Users");
         if (users.length)
           db.users = users.map((u) => ({ password: "changeme", ...(u as object) })) as DB["users"];
+        const brand = get("Branding");
+        if (brand.length) db.branding = { ...db.branding, ...(brand[0] as object) } as DB["branding"];
         (Object.keys(db.modules) as (keyof DB["modules"])[]).forEach((k) => {
           const inv = get(`${k}-inventory`);
-          if (inv.length) db.modules[k].inventory = inv as unknown as DB["modules"][typeof k]["inventory"];
+          if (inv.length)
+            db.modules[k].inventory = inv.map((r) => ({
+              photo: "",
+              ...(r as object),
+            })) as unknown as DB["modules"][typeof k]["inventory"];
+
+          const dep = get(`${k}-deployment`);
+          if (dep.length) {
+            const grouped = new Map<string, DB["modules"][typeof k]["deployment"][number]>();
+            dep.forEach((r) => {
+              const row = r as Record<string, never>;
+              const key = String(row.id ?? row.transNo);
+              if (!grouped.has(key))
+                grouped.set(key, {
+                  id: String(row.id ?? key),
+                  transNo: String(row.transNo ?? ""),
+                  date: String(row.date ?? ""),
+                  name: String(row.name ?? ""),
+                  area: String(row.area ?? ""),
+                  lines: [],
+                } as never);
+              grouped.get(key)!.lines.push({
+                materialName: String(row.materialName ?? ""),
+                photo: String(row.photo ?? ""),
+                model: String(row.model ?? ""),
+                unit: String(row.unit ?? ""),
+                wmNo: row.wmNo ? String(row.wmNo) : undefined,
+                wmKeyNo: row.wmKeyNo ? String(row.wmKeyNo) : undefined,
+                qty: Number(row.qty ?? 0),
+              });
+            });
+            db.modules[k].deployment = [...grouped.values()];
+          }
         });
+        const acc = get("accomplishment");
+        if (acc.length)
+          db.accomplishment = acc.map((r) => ({
+            photo: "",
+            ...(r as object),
+          })) as unknown as DB["accomplishment"];
         replaceDB(db);
         resolve();
       } catch (e) {
