@@ -136,31 +136,51 @@ export function restoreJson(file: File) {
   });
 }
 
-/** Branded PDF with centered logo + company header, table body, signatories + version footer. */
-export function exportPDF(title: string, columns: string[], rows: (string | number)[][], b?: Branding) {
+/** Branded PDF: round 3D logo beside the company block, table body, signatories + version footer. */
+export async function exportPDF(
+  title: string,
+  columns: string[],
+  rows: (string | number)[][],
+  b?: Branding,
+) {
   const brand = b ?? getDB().branding;
   const doc = new jsPDF({ orientation: columns.length > 6 ? "landscape" : "portrait" });
   const w = doc.internal.pageSize.getWidth();
-  let y = 12;
+  const top = 12;
+
+  let round = "";
   if (brand.logo) {
     try {
-      doc.addImage(brand.logo, "PNG", w / 2 - 11, y, 22, 22);
-      y += 25;
+      round = await toCircleBase64(brand.logo, 512);
     } catch {
-      y += 2;
+      round = "";
     }
   }
+
+  const size = 26;
+  const gap = 6;
+  const textCenter = round ? w / 2 + (size + gap) / 2 : w / 2;
+  if (round) {
+    try {
+      doc.addImage(round, "PNG", textCenter - size / 2 - gap - size, top, size, size);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const y = top + 8;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(brand.companyName, w / 2, y, { align: "center" });
+  doc.text(brand.companyName, textCenter, y, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(brand.addressLine1, w / 2, y + 5, { align: "center" });
-  doc.text(brand.addressLine2, w / 2, y + 10, { align: "center" });
-  doc.text(brand.contact, w / 2, y + 15, { align: "center" });
+  doc.text(brand.addressLine1, textCenter, y + 5, { align: "center" });
+  doc.text(brand.addressLine2, textCenter, y + 10, { align: "center" });
+  doc.text(brand.contact, textCenter, y + 15, { align: "center" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text(title.toUpperCase(), w / 2, y + 24, { align: "center" });
+
 
   autoTable(doc, {
     startY: y + 29,
