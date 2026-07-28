@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getDB, replaceDB, type Branding, type DB } from "./db";
+import { toCircleBase64 } from "./imaging";
 
 export type Row = Record<string, unknown>;
 
