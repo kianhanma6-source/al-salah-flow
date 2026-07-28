@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getDB, replaceDB, type Branding, type DB } from "./db";
+import { toCircleBase64 } from "./imaging";
 
 export type Row = Record<string, unknown>;
 
@@ -21,12 +22,15 @@ export function exportAllExcel(db: DB = getDB()) {
       name.slice(0, 30),
     );
   add("Users", db.users.map(({ password: _p, ...u }) => u) as Row[]);
+  add("Branding", [db.branding as unknown as Row]);
   (Object.keys(db.modules) as (keyof DB["modules"])[]).forEach((k) => {
-    add(`${k}-inventory`, db.modules[k].inventory.map(({ photo: _x, ...r }) => r) as Row[]);
+    // photo kept as base64 string so pictures survive export/import
+    add(`${k}-inventory`, db.modules[k].inventory as unknown as Row[]);
     add(
       `${k}-deployment`,
       db.modules[k].deployment.flatMap((d) =>
-        d.lines.map(({ photo: _x, ...l }) => ({
+        d.lines.map((l) => ({
+          id: d.id,
           transNo: d.transNo,
           date: d.date,
           name: d.name,
@@ -36,7 +40,7 @@ export function exportAllExcel(db: DB = getDB()) {
       ) as Row[],
     );
   });
-  add("accomplishment", db.accomplishment.map(({ photo: _x, ...r }) => r) as Row[]);
+  add("accomplishment", db.accomplishment as unknown as Row[]);
   XLSX.writeFile(wb, `AHAS_ALL_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
@@ -52,10 +56,50 @@ export function importAllExcel(file: File) {
         const users = get("Users");
         if (users.length)
           db.users = users.map((u) => ({ password: "changeme", ...(u as object) })) as DB["users"];
+        const brand = get("Branding");
+        if (brand.length) db.branding = { ...db.branding, ...(brand[0] as object) } as DB["branding"];
         (Object.keys(db.modules) as (keyof DB["modules"])[]).forEach((k) => {
           const inv = get(`${k}-inventory`);
-          if (inv.length) db.modules[k].inventory = inv as unknown as DB["modules"][typeof k]["inventory"];
+          if (inv.length)
+            db.modules[k].inventory = inv.map((r) => ({
+              photo: "",
+              ...(r as object),
+            })) as unknown as DB["modules"][typeof k]["inventory"];
+
+          const dep = get(`${k}-deployment`);
+          if (dep.length) {
+            const grouped = new Map<string, DB["modules"][typeof k]["deployment"][number]>();
+            dep.forEach((r) => {
+              const row = r as Record<string, never>;
+              const key = String(row.id ?? row.transNo);
+              if (!grouped.has(key))
+                grouped.set(key, {
+                  id: String(row.id ?? key),
+                  transNo: String(row.transNo ?? ""),
+                  date: String(row.date ?? ""),
+                  name: String(row.name ?? ""),
+                  area: String(row.area ?? ""),
+                  lines: [],
+                } as never);
+              grouped.get(key)!.lines.push({
+                materialName: String(row.materialName ?? ""),
+                photo: String(row.photo ?? ""),
+                model: String(row.model ?? ""),
+                unit: String(row.unit ?? ""),
+                wmNo: row.wmNo ? String(row.wmNo) : undefined,
+                wmKeyNo: row.wmKeyNo ? String(row.wmKeyNo) : undefined,
+                qty: Number(row.qty ?? 0),
+              });
+            });
+            db.modules[k].deployment = [...grouped.values()];
+          }
         });
+        const acc = get("accomplishment");
+        if (acc.length)
+          db.accomplishment = acc.map((r) => ({
+            photo: "",
+            ...(r as object),
+          })) as unknown as DB["accomplishment"];
         replaceDB(db);
         resolve();
       } catch (e) {
@@ -93,31 +137,51 @@ export function restoreJson(file: File) {
   });
 }
 
-/** Branded PDF with centered logo + company header, table body, signatories + version footer. */
-export function exportPDF(title: string, columns: string[], rows: (string | number)[][], b?: Branding) {
+/** Branded PDF: round 3D logo beside the company block, table body, signatories + version footer. */
+export async function exportPDF(
+  title: string,
+  columns: string[],
+  rows: (string | number)[][],
+  b?: Branding,
+) {
   const brand = b ?? getDB().branding;
   const doc = new jsPDF({ orientation: columns.length > 6 ? "landscape" : "portrait" });
   const w = doc.internal.pageSize.getWidth();
-  let y = 12;
+  const top = 12;
+
+  let round = "";
   if (brand.logo) {
     try {
-      doc.addImage(brand.logo, "PNG", w / 2 - 11, y, 22, 22);
-      y += 25;
+      round = await toCircleBase64(brand.logo, 512);
     } catch {
-      y += 2;
+      round = "";
     }
   }
+
+  const size = 26;
+  const gap = 6;
+  const textCenter = round ? w / 2 + (size + gap) / 2 : w / 2;
+  if (round) {
+    try {
+      doc.addImage(round, "PNG", textCenter - size / 2 - gap - size, top, size, size);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const y = top + 8;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(brand.companyName, w / 2, y, { align: "center" });
+  doc.text(brand.companyName, textCenter, y, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(brand.addressLine1, w / 2, y + 5, { align: "center" });
-  doc.text(brand.addressLine2, w / 2, y + 10, { align: "center" });
-  doc.text(brand.contact, w / 2, y + 15, { align: "center" });
+  doc.text(brand.addressLine1, textCenter, y + 5, { align: "center" });
+  doc.text(brand.addressLine2, textCenter, y + 10, { align: "center" });
+  doc.text(brand.contact, textCenter, y + 15, { align: "center" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text(title.toUpperCase(), w / 2, y + 24, { align: "center" });
+
 
   autoTable(doc, {
     startY: y + 29,
