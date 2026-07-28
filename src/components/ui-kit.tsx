@@ -208,35 +208,19 @@ export function DataTable({
 }
 
 export function SearchBar({
-  transFrom,
-  transTo,
-  dateFrom,
-  dateTo,
+  value,
   set,
 }: {
-  transFrom: string;
-  transTo: string;
-  dateFrom: string;
-  dateTo: string;
-  set: (patch: Record<string, string>) => void;
+  value: string;
+  set: (v: string) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <Field label="Trans No. From">
-        <Input value={transFrom} onChange={(e) => set({ transFrom: e.target.value })} />
-      </Field>
-      <Field label="Trans No. To">
-        <Input value={transTo} onChange={(e) => set({ transTo: e.target.value })} />
-      </Field>
-      <Field label="Date From">
-        <Input type="date" value={dateFrom} onChange={(e) => set({ dateFrom: e.target.value })} />
-      </Field>
-      <Field label="Date To">
-        <Input type="date" value={dateTo} onChange={(e) => set({ dateTo: e.target.value })} />
-      </Field>
-    </div>
+    <Field label="Search all records (trans no., date, name, model, area, unit…)">
+      <Input value={value} onChange={(e) => set(e.target.value)} placeholder="Type to search…" />
+    </Field>
   );
 }
+
 
 export function StatusChip({ status }: { status: string }) {
   const tone =
