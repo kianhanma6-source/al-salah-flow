@@ -27,14 +27,21 @@ import {
 
 type SubTab = "inventory" | "deployment" | "monitor";
 
-const emptySearch = { transFrom: "", transTo: "", dateFrom: "", dateTo: "" };
-
-function inRange(transNo: string, date: string, s: typeof emptySearch) {
-  if (s.transFrom && transNo < s.transFrom) return false;
-  if (s.transTo && transNo > s.transTo) return false;
-  if (s.dateFrom && date < s.dateFrom) return false;
-  if (s.dateTo && date > s.dateTo) return false;
-  return true;
+function matches(row: unknown, q: string) {
+  const term = q.trim().toLowerCase();
+  if (!term) return true;
+  const collect = (v: unknown): string => {
+    if (v == null) return "";
+    if (Array.isArray(v)) return v.map(collect).join(" ");
+    if (typeof v === "object") {
+      return Object.entries(v as Record<string, unknown>)
+        .filter(([k]) => k !== "photo" && k !== "id")
+        .map(([, val]) => collect(val))
+        .join(" ");
+    }
+    return String(v);
+  };
+  return collect(row).toLowerCase().includes(term);
 }
 
 export function ModuleView({
@@ -56,9 +63,9 @@ export function ModuleView({
   const mod = db.modules[moduleKey];
   const [sub, setSub] = useState<SubTab>("inventory");
 
-  const [invSearch, setInvSearch] = useState(emptySearch);
-  const [depSearch, setDepSearch] = useState(emptySearch);
-  const [monSearch, setMonSearch] = useState(emptySearch);
+  const [invSearch, setInvSearch] = useState("");
+  const [depSearch, setDepSearch] = useState("");
+  const [monSearch, setMonSearch] = useState("");
 
   /* ---------- inventory form ---------- */
   const blankInv = {
@@ -179,15 +186,15 @@ export function ModuleView({
 
   /* ---------- filtered lists (auto sort z-a) ---------- */
   const invRows = mod.inventory
-    .filter((r) => inRange(r.transNo, r.date, invSearch))
+    .filter((r) => matches(r, invSearch))
     .sort((a, b) => b.transNo.localeCompare(a.transNo));
 
   const depRows = mod.deployment
-    .filter((r) => inRange(r.transNo, r.date, depSearch))
+    .filter((r) => matches(r, depSearch))
     .sort((a, b) => b.transNo.localeCompare(a.transNo));
 
   const historyRows = mod.deployment
-    .filter((r) => inRange(r.transNo, r.date, monSearch))
+    .filter((r) => matches(r, monSearch))
     .flatMap((d) => d.lines.map((l) => ({ ...d, ...l })))
     .sort((a, b) => b.transNo.localeCompare(a.transNo));
 
@@ -216,7 +223,7 @@ export function ModuleView({
       {sub === "inventory" && (
         <>
           <Panel title={`${title} · Search Inventory`}>
-            <SearchBar {...invSearch} set={(p) => setInvSearch((s) => ({ ...s, ...p }))} />
+            <SearchBar value={invSearch} set={setInvSearch} />
           </Panel>
 
           {writable && (
@@ -350,7 +357,7 @@ export function ModuleView({
       {sub === "deployment" && (
         <>
           <Panel title={`${title} · Search Deployment`}>
-            <SearchBar {...depSearch} set={(p) => setDepSearch((s) => ({ ...s, ...p }))} />
+            <SearchBar value={depSearch} set={setDepSearch} />
           </Panel>
 
           {writable && (
@@ -520,7 +527,7 @@ export function ModuleView({
       {sub === "monitor" && (
         <>
           <Panel title={`${title} · Search`}>
-            <SearchBar {...monSearch} set={(p) => setMonSearch((s) => ({ ...s, ...p }))} />
+            <SearchBar value={monSearch} set={setMonSearch} />
           </Panel>
 
           {wm ? (

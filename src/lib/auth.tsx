@@ -97,15 +97,16 @@ const PROG: Role[] = ["PROGRAMMER-IV", "PROGRAMMER"];
 const ACCESS: Record<TabKey, Role[]> = {
   dashboard: [...PROG, "ADMIN", "USER", "VISITOR", "Technician", "Collection team", "Sales", "WM Deployment", "Logistic"],
   users: [...PROG, "ADMIN"],
-  logistic: [...PROG, "Logistic", "VISITOR"],
-  board: [...PROG, "Logistic", "VISITOR"],
-  installation: [...PROG, "Logistic", "WM Deployment", "VISITOR"],
-  wm: [...PROG, "WM Deployment", "VISITOR"],
-  wmreturn: [...PROG, "Logistic", "VISITOR"],
-  accomplishment: [...PROG, "Logistic", "VISITOR"],
+  logistic: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
+  board: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
+  installation: [...PROG, "ADMIN", "USER", "Logistic", "WM Deployment", "VISITOR"],
+  wm: [...PROG, "ADMIN", "USER", "WM Deployment", "VISITOR"],
+  wmreturn: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
+  accomplishment: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
   backup: ["PROGRAMMER-IV", "Logistic"],
   branding: ["PROGRAMMER-IV"],
 };
+
 
 export const canAccess = (role: Role | undefined, tab: TabKey) =>
   !!role && ACCESS[tab].includes(role);
