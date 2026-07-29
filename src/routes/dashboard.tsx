@@ -29,8 +29,10 @@ const MODULES: { key: TabKey; mod: "logistic" | "board" | "installation" | "wm" 
 
 function Dashboard() {
   const db = useDB();
-  const { user } = useAuth();
-  const allowed = MODULES.filter((m) => canAccess(user?.role, m.key));
+  const { user: session } = useAuth();
+  const user = db.users.find((u) => u.id === session?.id) ?? session;
+  const allowed = MODULES.filter((m) => canAccess(user, m.key));
+
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
