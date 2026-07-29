@@ -48,18 +48,21 @@ export function ReportHeader() {
 
 
 export function AppShell({ tab, children }: { tab: TabKey; children: ReactNode }) {
-  const { user, ready, logout } = useAuth();
+  const { user: session, ready, logout } = useAuth();
+  const db = useDB();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (ready && !user) navigate({ to: "/", replace: true });
-  }, [ready, user, navigate]);
+    if (ready && !session) navigate({ to: "/", replace: true });
+  }, [ready, session, navigate]);
 
-  if (!ready || !user) return null;
+  if (!ready || !session) return null;
+  // always read the live record so permission changes apply immediately
+  const user = db.users.find((u) => u.id === session.id) ?? session;
 
-  if (!canAccess(user.role, tab)) {
+  if (!canAccess(user, tab)) {
     return (
       <Frame user={user} tab={tab} open={open} setOpen={setOpen} pathname={pathname} logout={logout}>
         <div className="panel-3d p-10 text-center">
@@ -87,7 +90,7 @@ function Frame({
   logout,
   children,
 }: {
-  user: { username: string; role: string; name: string };
+  user: User;
   tab: TabKey;
   open: boolean;
   setOpen: (v: boolean) => void;
@@ -95,7 +98,8 @@ function Frame({
   logout: () => void;
   children: ReactNode;
 }) {
-  const visible = TABS.filter((t) => canAccess(user.role as never, t.key));
+  const visible = TABS.filter((t) => canAccess(user, t.key));
+
   return (
     <div className="relative min-h-screen">
       <div className="aurora" />
