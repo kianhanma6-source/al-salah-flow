@@ -6,10 +6,21 @@ export const PROGRAMMER_TAG = "NAD ITALLO-PROGRAMMER " + APP_VERSION;
 export type Role =
   | "PROGRAMMER-IV"
   | "PROGRAMMER"
+  | "Logistic Admin"
+  | "Logistic User"
+  | "Warehouse Admin"
+  | "Warehouse User"
+  | "Manager"
+  | "HR Admin"
+  | "Sales Person"
+  | "Technician"
+  | "Collection Team"
+  | "Client"
+  | "Viewer"
+  /* legacy roles kept so existing saved accounts keep working */
   | "ADMIN"
   | "USER"
   | "VISITOR"
-  | "Technician"
   | "Collection team"
   | "Sales"
   | "WM Deployment"
@@ -18,15 +29,20 @@ export type Role =
 export const ROLES: Role[] = [
   "PROGRAMMER-IV",
   "PROGRAMMER",
-  "ADMIN",
-  "USER",
-  "VISITOR",
+  "Logistic Admin",
+  "Logistic User",
+  "Warehouse Admin",
+  "Warehouse User",
+  "Manager",
+  "HR Admin",
+  "Sales Person",
   "Technician",
-  "Collection team",
-  "Sales",
-  "WM Deployment",
-  "Logistic",
+  "Collection Team",
+  "Client",
+  "Viewer",
 ];
+
+export const PROTECTED_USERNAME = "NAD ITALLO";
 
 export interface User {
   id: string;
@@ -36,6 +52,8 @@ export interface User {
   position: string;
   role: Role;
   locked?: boolean;
+  /** Dashboard permissions assigned by NAD ITALLO (overrides role defaults). */
+  perms?: string[];
   createdAt: string;
 }
 
@@ -44,10 +62,12 @@ export interface Branding {
   addressLine1: string;
   addressLine2: string;
   contact: string;
+  email: string;
   logo: string; // base64 or url
   signatory1: string;
   signatory2: string;
 }
+
 
 export interface InventoryRow {
   id: string;
