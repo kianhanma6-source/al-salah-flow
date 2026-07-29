@@ -293,7 +293,7 @@ export function ModuleView({
                   onClick={() =>
                     exportExcel(
                       "Inventory",
-                      invRows.map(({ photo: _p, ...r }) => r),
+                      invRows,
                       `${moduleKey}_inventory`,
                     )
                   }
@@ -307,6 +307,8 @@ export function ModuleView({
                       `${title} Inventory Report`,
                       ["Trans No", "Date", nameLabel, "Model", "Unit", "Qty"],
                       invRows.map((r) => [r.transNo, r.date, r.materialName, r.model, r.unit, r.qty]),
+                      undefined,
+                      invRows.map((r) => r.photo || undefined),
                     )
                   }
                 >
@@ -469,7 +471,7 @@ export function ModuleView({
                   onClick={() =>
                     exportExcel(
                       "Deployment",
-                      depRows.flatMap((d) => d.lines.map(({ photo: _p, ...l }) => ({ transNo: d.transNo, date: d.date, name: d.name, area: d.area, ...l }))),
+                      depRows.flatMap((d) => d.lines.map((l) => ({ transNo: d.transNo, date: d.date, name: d.name, area: d.area, ...l }))),
                       `${moduleKey}_deployment`,
                     )
                   }
@@ -483,6 +485,8 @@ export function ModuleView({
                       `${title} Deployment Report`,
                       ["Trans No", "Date", "Name", "Area", nameLabel, "Model", "Unit", "Qty"],
                       depRows.flatMap((d) => d.lines.map((l) => [d.transNo, d.date, d.name, d.area, l.materialName, l.model, l.unit, l.qty])),
+                      undefined,
+                      depRows.flatMap((d) => d.lines.map((l) => l.photo || undefined)),
                     )
                   }
                 >
@@ -532,15 +536,17 @@ export function ModuleView({
 
           {wm ? (
             <Panel
-              title={`${title} · History Displaylist`}
+              title={`${title} · ${monitorLabel} Displaylist`}
               actions={
                 <button
                   className="btn-ghost-3d"
                   onClick={() =>
                     exportPDF(
-                      `${title} History`,
+                      `${title} ${monitorLabel}`,
                       ["Trans No", "Date", "Name", "Area", nameLabel, "Model", "WM No", "WM Key No", "Unit", "Qty"],
                       historyRows.map((r) => [r.transNo, r.date, r.name, r.area, r.materialName, r.model, r.wmNo ?? "", r.wmKeyNo ?? "", r.unit, r.qty]),
+                      undefined,
+                      historyRows.map((r) => r.photo || undefined),
                     )
                   }
                 >
@@ -558,7 +564,7 @@ export function ModuleView({
               title={`${title} · Monitoring Displaylist`}
               actions={
                 <>
-                  <button className="btn-ghost-3d" onClick={() => exportExcel("Monitoring", stock.map(({ photo: _p, key: _k, ...r }) => r), `${moduleKey}_monitoring`)}>
+                  <button className="btn-ghost-3d" onClick={() => exportExcel("Monitoring", stock.map(({ key: _k, ...r }) => r), `${moduleKey}_monitoring`)}>
                     <FileSpreadsheet className="size-4" /> Excel
                   </button>
                   <button
@@ -568,6 +574,8 @@ export function ModuleView({
                         `${title} Monitoring Report`,
                         ["Material", "Model", "Unit", "Received", "Deployed", "Balance", "Status"],
                         stock.map((s) => [s.materialName, s.model, s.unit, s.received, s.deployed, s.balance, s.status]),
+                        undefined,
+                        stock.map((s) => s.photo || undefined),
                       )
                     }
                   >
