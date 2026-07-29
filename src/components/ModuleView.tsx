@@ -293,7 +293,7 @@ export function ModuleView({
                   onClick={() =>
                     exportExcel(
                       "Inventory",
-                      invRows,
+                      invRows as unknown as Record<string, unknown>[],
                       `${moduleKey}_inventory`,
                     )
                   }
