@@ -219,20 +219,29 @@ export async function exportPDF(
 
 export function exportAllPDF(db: DB = getDB()) {
   const rows: (string | number)[][] = [];
+  const photos: (string | undefined)[] = [];
   (Object.keys(db.modules) as (keyof DB["modules"])[]).forEach((k) => {
-    db.modules[k].inventory.forEach((i) =>
-      rows.push([k, "INVENTORY", i.transNo, i.date, i.materialName, i.model, i.unit, i.qty]),
-    );
+    db.modules[k].inventory.forEach((i) => {
+      rows.push([k, "INVENTORY", i.transNo, i.date, i.materialName, i.model, i.unit, i.qty]);
+      photos.push(i.photo || undefined);
+    });
     db.modules[k].deployment.forEach((d) =>
-      d.lines.forEach((l) =>
-        rows.push([k, "DEPLOYMENT", d.transNo, d.date, l.materialName, l.model, l.unit, l.qty]),
-      ),
+      d.lines.forEach((l) => {
+        rows.push([k, "DEPLOYMENT", d.transNo, d.date, l.materialName, l.model, l.unit, l.qty]);
+        photos.push(l.photo || undefined);
+      }),
     );
+  });
+  db.accomplishment.forEach((a) => {
+    rows.push(["accomplishment", "ACTIVITY", "—", a.date, a.name, a.area, a.activity, a.qty]);
+    photos.push(a.photo || undefined);
   });
   exportPDF(
     "All Data Report",
     ["Module", "Type", "Trans No", "Date", "Material", "Model", "Unit", "Qty"],
     rows,
     db.branding,
+    photos,
+
   );
 }
