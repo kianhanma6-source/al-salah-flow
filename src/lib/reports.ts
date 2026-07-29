@@ -137,17 +137,22 @@ export function restoreJson(file: File) {
   });
 }
 
-/** Branded PDF: round 3D logo beside the company block, table body, signatories + version footer. */
+/** Branded PDF: round 3D logo centered above the company block, table body, signatories + version footer.
+ *  Pass `photos` (one entry per row, base64) to print the saved pictures inside the report. */
 export async function exportPDF(
   title: string,
   columns: string[],
   rows: (string | number)[][],
   b?: Branding,
+  photos?: (string | undefined)[],
 ) {
   const brand = b ?? getDB().branding;
-  const doc = new jsPDF({ orientation: columns.length > 6 ? "landscape" : "portrait" });
+  const withPhotos = !!photos?.some(Boolean);
+  const cols = withPhotos ? ["Photo", ...columns] : columns;
+  const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
+  const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
   const w = doc.internal.pageSize.getWidth();
-  const top = 12;
+  const top = 10;
 
   let round = "";
   if (brand.logo) {
@@ -158,37 +163,46 @@ export async function exportPDF(
     }
   }
 
-  const size = 26;
-  const gap = 6;
-  const textCenter = round ? w / 2 + (size + gap) / 2 : w / 2;
+  const size = 24;
   if (round) {
     try {
-      doc.addImage(round, "PNG", textCenter - size / 2 - gap - size, top, size, size);
+      doc.addImage(round, "PNG", w / 2 - size / 2, top, size, size);
     } catch {
       /* ignore */
     }
   }
 
-  const y = top + 8;
+  const y = top + (round ? size + 7 : 8);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(brand.companyName, textCenter, y, { align: "center" });
+  doc.text(brand.companyName, w / 2, y, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(brand.addressLine1, textCenter, y + 5, { align: "center" });
-  doc.text(brand.addressLine2, textCenter, y + 10, { align: "center" });
-  doc.text(brand.contact, textCenter, y + 15, { align: "center" });
+  doc.text(brand.addressLine1, w / 2, y + 5, { align: "center" });
+  doc.text(brand.addressLine2, w / 2, y + 10, { align: "center" });
+  doc.text(brand.contact, w / 2, y + 15, { align: "center" });
+  if (brand.email) doc.text(brand.email, w / 2, y + 20, { align: "center" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text(title.toUpperCase(), w / 2, y + 24, { align: "center" });
-
+  doc.text(title.toUpperCase(), w / 2, y + (brand.email ? 29 : 24), { align: "center" });
 
   autoTable(doc, {
-    startY: y + 29,
-    head: [columns],
-    body: rows.length ? rows : [columns.map(() => "-")],
-    styles: { fontSize: 8, cellPadding: 2 },
+    startY: y + (brand.email ? 34 : 29),
+    head: [cols],
+    body: body.length ? body : [cols.map(() => "-")],
+    styles: { fontSize: 8, cellPadding: 2, minCellHeight: withPhotos ? 16 : undefined },
     headStyles: { fillColor: [17, 46, 82] },
+    columnStyles: withPhotos ? { 0: { cellWidth: 18 } } : undefined,
+    didDrawCell: (data) => {
+      if (!withPhotos || data.section !== "body" || data.column.index !== 0) return;
+      const src = photos?.[data.row.index];
+      if (!src) return;
+      try {
+        doc.addImage(src, "JPEG", data.cell.x + 2, data.cell.y + 2, 12, 12);
+      } catch {
+        /* ignore unsupported image */
+      }
+    },
     didDrawPage: () => {
       const h = doc.internal.pageSize.getHeight();
       doc.setFontSize(8);
@@ -201,6 +215,7 @@ export async function exportPDF(
 
   doc.save(`${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
+
 
 export function exportAllPDF(db: DB = getDB()) {
   const rows: (string | number)[][] = [];
