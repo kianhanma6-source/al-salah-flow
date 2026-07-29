@@ -90,29 +90,70 @@ export type TabKey =
   | "wmreturn"
   | "accomplishment"
   | "backup"
+  | "cleaning"
   | "branding";
+
+export const ALL_TABS: { key: TabKey; label: string }[] = [
+  { key: "dashboard", label: "Dashboard" },
+  { key: "logistic", label: "Logistic" },
+  { key: "board", label: "Board Parts" },
+  { key: "installation", label: "Installation" },
+  { key: "wm", label: "WM Deployment" },
+  { key: "wmreturn", label: "WM Returned / Scrap" },
+  { key: "accomplishment", label: "Accomplishment" },
+  { key: "users", label: "User Management" },
+  { key: "backup", label: "Backup & Data" },
+  { key: "cleaning", label: "Data Cleaning" },
+  { key: "branding", label: "Re-Branding" },
+];
+
+const EVERY: TabKey[] = ALL_TABS.map((t) => t.key);
+const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
+
+/** Default dashboards per role (NAD ITALLO can override per user). */
+const ACCESS: Record<string, TabKey[]> = {
+  "PROGRAMMER-IV": EVERY,
+  PROGRAMMER: without("branding"),
+  "Logistic Admin": without("branding", "cleaning"),
+  "Logistic User": without("branding", "cleaning", "users"),
+  "Warehouse Admin": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment"),
+  "Warehouse User": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", "users"),
+  Manager: ["dashboard"],
+  "HR Admin": ["dashboard"],
+  "Sales Person": ["dashboard"],
+  Technician: ["dashboard"],
+  "Collection Team": ["dashboard"],
+  Client: ["dashboard"],
+  Viewer: ["dashboard"],
+  /* legacy */
+  ADMIN: without("branding", "cleaning"),
+  USER: without("branding", "cleaning", "users"),
+  VISITOR: ["dashboard"],
+  "Collection team": ["dashboard"],
+  Sales: ["dashboard"],
+  "WM Deployment": ["dashboard"],
+  Logistic: without("branding", "cleaning"),
+};
 
 const PROG: Role[] = ["PROGRAMMER-IV", "PROGRAMMER"];
 
-const ACCESS: Record<TabKey, Role[]> = {
-  dashboard: [...PROG, "ADMIN", "USER", "VISITOR", "Technician", "Collection team", "Sales", "WM Deployment", "Logistic"],
-  users: [...PROG, "ADMIN"],
-  logistic: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
-  board: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
-  installation: [...PROG, "ADMIN", "USER", "Logistic", "WM Deployment", "VISITOR"],
-  wm: [...PROG, "ADMIN", "USER", "WM Deployment", "VISITOR"],
-  wmreturn: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
-  accomplishment: [...PROG, "ADMIN", "USER", "Logistic", "VISITOR"],
-  backup: ["PROGRAMMER-IV", "Logistic"],
-  branding: ["PROGRAMMER-IV"],
+export const allowedTabs = (u: Pick<User, "role" | "perms"> | null | undefined): TabKey[] => {
+  if (!u) return [];
+  if (PROG.includes(u.role)) return ACCESS[u.role] ?? EVERY;
+  if (u.perms && u.perms.length)
+    return EVERY.filter((t) => u.perms!.includes(t) && t !== "branding" && t !== "cleaning");
+  return ACCESS[u.role] ?? ["dashboard"];
 };
 
+export const canAccess = (u: Pick<User, "role" | "perms"> | null | undefined, tab: TabKey) =>
+  allowedTabs(u).includes(tab);
 
-export const canAccess = (role: Role | undefined, tab: TabKey) =>
-  !!role && ACCESS[tab].includes(role);
+/** View-only roles. */
+const READ_ONLY: string[] = ["Viewer", "Client", "VISITOR"];
+export const canWrite = (role: Role | undefined) => !!role && !READ_ONLY.includes(role);
 
-/** VISITOR is view-only everywhere. */
-export const canWrite = (role: Role | undefined) => !!role && role !== "VISITOR";
-
-export const canDeleteUser = (role: Role | undefined) => !!role && PROG.includes(role);
+/** Only the PROGRAMMER-IV NAD ITALLO account may delete user accounts. */
+export const canDeleteUser = (role: Role | undefined) => role === "PROGRAMMER-IV";
 export const isProgrammerIV = (role: Role | undefined) => role === "PROGRAMMER-IV";
+export const isProgrammer = (role: Role | undefined) => !!role && PROG.includes(role);
+
