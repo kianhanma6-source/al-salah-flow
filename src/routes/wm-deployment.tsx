@@ -13,7 +13,7 @@ export const Route = createFileRoute("/wm-deployment")({
   }),
   component: () => (
     <AppShell tab="wm">
-      <ModuleView moduleKey="wm" title="WM Deployment" wm prefix="WM" monitorLabel="Deployment History" />
+      <ModuleView moduleKey="wm" title="WM Deployment" wm prefix="WM" monitorLabel="MONITORING" />
     </AppShell>
   ),
 });

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/wm-returned")({
   }),
   component: () => (
     <AppShell tab="wmreturn">
-      <ModuleView moduleKey="wmreturn" title="WM Returned / Scrap" wm prefix="WMR" monitorLabel="Returned / Scrap History" />
+      <ModuleView moduleKey="wmreturn" title="WM Returned / Scrap" wm prefix="WMR" monitorLabel="MONITORING" />
     </AppShell>
   ),
 });

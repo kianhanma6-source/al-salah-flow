@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LogOut, Menu, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { canAccess, useAuth, type TabKey } from "@/lib/auth";
-import { PROGRAMMER_TAG, useDB } from "@/lib/db";
+import { PROGRAMMER_TAG, useDB, type User } from "@/lib/db";
 import defaultLogo from "@/assets/logo.png";
 
 const TABS: { key: TabKey; to: string; label: string }[] = [
@@ -15,21 +15,22 @@ const TABS: { key: TabKey; to: string; label: string }[] = [
   { key: "accomplishment", to: "/accomplishment", label: "Accomplishment" },
   { key: "users", to: "/users", label: "User Management" },
   { key: "backup", to: "/backup", label: "Backup & Data" },
+  { key: "cleaning", to: "/data-cleaning", label: "Data Cleaning" },
   { key: "branding", to: "/branding", label: "Re-Branding" },
 ];
 
 export function ReportHeader() {
   const { branding } = useDB();
   return (
-    <div className="panel-3d flex flex-col items-center gap-3 px-4 py-5 text-center sm:flex-row sm:justify-center sm:text-left">
-      <div className="relative shrink-0">
+    <div className="panel-3d flex flex-col items-center gap-3 px-4 py-5 text-center">
+      <div className="relative">
         <div className="absolute -inset-2 rounded-full bg-primary/25 blur-xl" />
         <img
           src={branding.logo || defaultLogo}
           alt="Company logo"
-          width={80}
-          height={80}
-          className="relative size-20 rounded-full border-2 border-primary/60 bg-white/90 object-contain p-1.5 shadow-[0_10px_22px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.75)]"
+          width={88}
+          height={88}
+          className="relative size-22 rounded-full border-2 border-primary/60 bg-white/90 object-contain p-1.5 shadow-[0_10px_22px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.75)]"
         />
       </div>
       <div>
@@ -39,24 +40,29 @@ export function ReportHeader() {
         <p className="text-xs text-muted-foreground">{branding.addressLine1}</p>
         <p className="text-xs text-muted-foreground">{branding.addressLine2}</p>
         <p className="text-xs text-muted-foreground">{branding.contact}</p>
+        {branding.email && <p className="text-xs text-muted-foreground">{branding.email}</p>}
       </div>
     </div>
   );
 }
 
+
 export function AppShell({ tab, children }: { tab: TabKey; children: ReactNode }) {
-  const { user, ready, logout } = useAuth();
+  const { user: session, ready, logout } = useAuth();
+  const db = useDB();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (ready && !user) navigate({ to: "/", replace: true });
-  }, [ready, user, navigate]);
+    if (ready && !session) navigate({ to: "/", replace: true });
+  }, [ready, session, navigate]);
 
-  if (!ready || !user) return null;
+  if (!ready || !session) return null;
+  // always read the live record so permission changes apply immediately
+  const user = db.users.find((u) => u.id === session.id) ?? session;
 
-  if (!canAccess(user.role, tab)) {
+  if (!canAccess(user, tab)) {
     return (
       <Frame user={user} tab={tab} open={open} setOpen={setOpen} pathname={pathname} logout={logout}>
         <div className="panel-3d p-10 text-center">
@@ -84,7 +90,7 @@ function Frame({
   logout,
   children,
 }: {
-  user: { username: string; role: string; name: string };
+  user: User;
   tab: TabKey;
   open: boolean;
   setOpen: (v: boolean) => void;
@@ -92,7 +98,8 @@ function Frame({
   logout: () => void;
   children: ReactNode;
 }) {
-  const visible = TABS.filter((t) => canAccess(user.role as never, t.key));
+  const visible = TABS.filter((t) => canAccess(user, t.key));
+
   return (
     <div className="relative min-h-screen">
       <div className="aurora" />
