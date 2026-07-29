@@ -15,6 +15,7 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
@@ -50,6 +51,11 @@ const LogisticRoute = LogisticRouteImport.update({
 const InstallationRoute = InstallationRouteImport.update({
   id: '/installation',
   path: '/installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataCleaningRoute = DataCleaningRouteImport.update({
+  id: '/data-cleaning',
+  path: '/data-cleaning',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
+  '/data-cleaning': typeof DataCleaningRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
+  '/data-cleaning': typeof DataCleaningRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
+  '/data-cleaning': typeof DataCleaningRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/dashboard'
+    | '/data-cleaning'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/dashboard'
+    | '/data-cleaning'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/dashboard'
+    | '/data-cleaning'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
   DashboardRoute: typeof DashboardRoute
+  DataCleaningRoute: typeof DataCleaningRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/installation'
       fullPath: '/installation'
       preLoaderRoute: typeof InstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-cleaning': {
+      id: '/data-cleaning'
+      path: '/data-cleaning'
+      fullPath: '/data-cleaning'
+      preLoaderRoute: typeof DataCleaningRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
   DashboardRoute: DashboardRoute,
+  DataCleaningRoute: DataCleaningRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
