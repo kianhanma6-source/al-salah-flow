@@ -139,38 +139,41 @@ const KEY = "ahas_system_v10";
 
 export const emptyModule = (): ModuleData => ({ inventory: [], deployment: [] });
 
+export const PROTECTED_ACCOUNTS: User[] = [
+  {
+    id: "u-programmer-iv",
+    username: PROTECTED_USERNAME,
+    password: "Feb12@2016",
+    name: "Nino Angelo D. Itallo",
+    position: "Electrician",
+    role: "PROGRAMMER-IV",
+    locked: true,
+    createdAt: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "u-programmer",
+    username: PROTECTED_USERNAME,
+    password: "Onin23-",
+    name: "Nino Angelo D. Itallo",
+    position: "Electrician",
+    role: "PROGRAMMER",
+    locked: true,
+    createdAt: "2024-01-01T00:00:00.000Z",
+  },
+];
+
 export const defaultDB = (): DB => ({
   branding: {
     companyName: "AL HAYAH AL SALAH ELECTRONICS DEVICES AND REP",
     addressLine1: "Damas 14  33a-33b, Abi Al Atahia street",
     addressLine2: "3 Floor, Office 346",
     contact: "Contact: +97165443485 / +971547701888",
+    email: "Email: info@alhayahalsalah.ae",
     logo: "",
     signatory1: "Prepared by: ______________________",
     signatory2: "Approved by: ______________________",
   },
-  users: [
-    {
-      id: "u-programmer-iv",
-      username: "NAD ITALLO",
-      password: "Onin23",
-      name: "Nino Angelo D. Itallo",
-      position: "System Administrator",
-      role: "PROGRAMMER-IV",
-      locked: true,
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "u-programmer",
-      username: "Blazark",
-      password: "admin123",
-      name: "Nino Angelo D. Itallo",
-      position: "System Administrator",
-      role: "PROGRAMMER",
-      locked: true,
-      createdAt: new Date().toISOString(),
-    },
-  ],
+  users: PROTECTED_ACCOUNTS.map((u) => ({ ...u })),
   combos: {
     name: [],
     area: [],
@@ -189,6 +192,16 @@ export const defaultDB = (): DB => ({
   accomplishment: [],
 });
 
+/** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
+export function enforceProtectedAccounts(db: DB): DB {
+  const others = db.users.filter(
+    (u) =>
+      !PROTECTED_ACCOUNTS.some((p) => p.id === u.id) &&
+      u.username.trim().toUpperCase() !== PROTECTED_USERNAME,
+  );
+  return { ...db, users: [...PROTECTED_ACCOUNTS.map((u) => ({ ...u })), ...others] };
+}
+
 let cache: DB | null = null;
 const listeners = new Set<() => void>();
 
@@ -199,7 +212,12 @@ function load(): DB {
     const raw = window.localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as DB;
-      cache = { ...defaultDB(), ...parsed, modules: { ...defaultDB().modules, ...parsed.modules } };
+      cache = enforceProtectedAccounts({
+        ...defaultDB(),
+        ...parsed,
+        branding: { ...defaultDB().branding, ...parsed.branding },
+        modules: { ...defaultDB().modules, ...parsed.modules },
+      });
     } else {
       cache = defaultDB();
     }
@@ -208,6 +226,7 @@ function load(): DB {
   }
   return cache!;
 }
+
 
 function persist(next: DB) {
   cache = next;
