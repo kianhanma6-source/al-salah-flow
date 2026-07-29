@@ -229,8 +229,8 @@ function load(): DB {
 
 
 function persist(next: DB) {
-  cache = next;
-  if (typeof window !== "undefined") window.localStorage.setItem(KEY, JSON.stringify(next));
+  cache = enforceProtectedAccounts(next);
+  if (typeof window !== "undefined") window.localStorage.setItem(KEY, JSON.stringify(cache));
   listeners.forEach((l) => l());
 }
 
@@ -243,7 +243,8 @@ export function setDB(updater: (db: DB) => DB) {
 }
 
 export function replaceDB(next: DB) {
-  persist({ ...defaultDB(), ...next });
+  persist({ ...defaultDB(), ...next, branding: { ...defaultDB().branding, ...next.branding } });
+
 }
 
 const serverSnapshot = defaultDB();
