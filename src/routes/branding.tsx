@@ -58,6 +58,10 @@ function BrandingPage() {
           <Field label="Contact Numbers">
             <Input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} />
           </Field>
+          <Field label="Email Address">
+            <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </Field>
+
           <Field label="Signatory 1">
             <Input value={form.signatory1} onChange={(e) => setForm({ ...form, signatory1: e.target.value })} />
           </Field>
