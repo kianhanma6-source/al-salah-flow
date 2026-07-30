@@ -432,3 +432,59 @@ export function availableQty(mod: ModuleData, materialName: string, model: strin
   const row = computeStock(mod).find((r) => r.materialName === materialName && r.model === model);
   return row?.balance ?? 0;
 }
+
+/* ---------------- HR helpers (Day 1) ---------------- */
+
+/** EMP ID format: AL_<year>_EID_<running no.> */
+export function nextEmpId(existing: Employee[]) {
+  const year = new Date().getFullYear();
+  const nums = existing
+    .map((e) => Number(String(e.empId).split("-").pop()?.replace(/\D/g, "")))
+    .filter((n) => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `AL-${year}-EID-${String(next).padStart(4, "0")}`;
+}
+
+export function yearsOfService(dateHired: string) {
+  if (!dateHired) return "—";
+  const from = new Date(dateHired);
+  const now = new Date();
+  if (Number.isNaN(from.getTime()) || from > now) return "—";
+  let years = now.getFullYear() - from.getFullYear();
+  let months = now.getMonth() - from.getMonth();
+  if (now.getDate() < from.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return `${years} yr${years === 1 ? "" : "s"} ${months} mo`;
+}
+
+export function daysUntil(date: string) {
+  if (!date) return null;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
+
+/** Documents expiring within 30 days (or already expired). */
+export function expiryAlerts(employees: Employee[]) {
+  const out: { employee: Employee; doc: string; date: string; days: number }[] = [];
+  employees.forEach((e) => {
+    ([
+      ["Emirates ID", e.emiratesIdExpiry],
+      ["Passport", e.passportExpiry],
+    ] as const).forEach(([doc, date]) => {
+      const days = daysUntil(date);
+      if (days !== null && days <= 30) out.push({ employee: e, doc, date, days });
+    });
+  });
+  return out.sort((a, b) => a.days - b.days);
+}
+
+export function hrTotals(lines: HRLine[], employeeId: string) {
+  const own = lines.filter((l) => l.employeeId === employeeId);
+  const benefits = own.filter((l) => l.kind === "BENEFIT").reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  const deductions = own.filter((l) => l.kind === "DEDUCTION").reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  return { benefits, deductions, net: benefits - deductions };
+}
