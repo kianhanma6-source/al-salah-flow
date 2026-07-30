@@ -19,6 +19,7 @@ import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -75,6 +76,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrandingRoute = BrandingRouteImport.update({
   id: '/branding',
   path: '/branding',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/board'
     | '/branding'
+    | '/chat'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/board'
     | '/branding'
+    | '/chat'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/board'
     | '/branding'
+    | '/chat'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
+  ChatRoute: typeof ChatRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/branding': {
       id: '/branding'
       path: '/branding'
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
+  ChatRoute: ChatRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
   HrBenefitsRoute: HrBenefitsRoute,
