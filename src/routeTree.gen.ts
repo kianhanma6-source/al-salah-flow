@@ -15,6 +15,7 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BrandingRouteImport } from './routes/branding'
@@ -51,6 +52,11 @@ const LogisticRoute = LogisticRouteImport.update({
 const InstallationRoute = InstallationRouteImport.update({
   id: '/installation',
   path: '/installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrEmployeesRoute = HrEmployeesRouteImport.update({
+  id: '/hr-employees',
+  path: '/hr-employees',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DataCleaningRoute = DataCleaningRouteImport.update({
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/branding': typeof BrandingRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/branding'
     | '/dashboard'
     | '/data-cleaning'
+    | '/hr-employees'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/branding'
     | '/dashboard'
     | '/data-cleaning'
+    | '/hr-employees'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/branding'
     | '/dashboard'
     | '/data-cleaning'
+    | '/hr-employees'
     | '/installation'
     | '/logistic'
     | '/sitemap.xml'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   BrandingRoute: typeof BrandingRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
+  HrEmployeesRoute: typeof HrEmployeesRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/installation'
       fullPath: '/installation'
       preLoaderRoute: typeof InstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr-employees': {
+      id: '/hr-employees'
+      path: '/hr-employees'
+      fullPath: '/hr-employees'
+      preLoaderRoute: typeof HrEmployeesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/data-cleaning': {
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrandingRoute: BrandingRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
+  HrEmployeesRoute: HrEmployeesRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
