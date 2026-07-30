@@ -125,6 +125,57 @@ export interface Combos {
   activity: string[];
   wmName: string[];
   wmModel: string[];
+  position: string[];
+}
+
+/* ---------------- HR (Day 1) ---------------- */
+
+export interface Employee {
+  id: string;
+  empId: string;
+  dateEncoded: string;
+  photo: string;
+  fullName: string;
+  position: string;
+  salary: number;
+  emiratesId: string;
+  emiratesIdExpiry: string;
+  passport: string;
+  passportExpiry: string;
+  mobile: string;
+  email: string;
+  address: string;
+  dateHired: string;
+  status: "ACTIVE" | "IN-ACTIVE";
+  /** links this employee record to a login account (optional) */
+  userId?: string;
+}
+
+export interface HRLine {
+  id: string;
+  employeeId: string;
+  kind: "BENEFIT" | "DEDUCTION";
+  description: string;
+  amount: number;
+  date: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  sender: string;
+  role: string;
+  text: string;
+  at: string;
+}
+
+export interface HRRequest {
+  id: string;
+  employeeId: string;
+  type: "ID" | "PAYSLIP" | "COE";
+  note: string;
+  status: "PENDING" | "RELEASED";
+  at: string;
 }
 
 export interface DB {
@@ -133,6 +184,10 @@ export interface DB {
   combos: Combos;
   modules: Record<ModuleKey, ModuleData>;
   accomplishment: AccomplishmentRow[];
+  employees: Employee[];
+  hrLines: HRLine[];
+  chat: ChatMessage[];
+  hrRequests: HRRequest[];
 }
 
 const KEY = "ahas_system_v10";
@@ -181,6 +236,7 @@ export const defaultDB = (): DB => ({
     activity: [],
     wmName: [],
     wmModel: [],
+    position: [],
   },
   modules: {
     logistic: emptyModule(),
@@ -190,6 +246,10 @@ export const defaultDB = (): DB => ({
     wmreturn: emptyModule(),
   },
   accomplishment: [],
+  employees: [],
+  hrLines: [],
+  chat: [],
+  hrRequests: [],
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
@@ -205,28 +265,43 @@ export function enforceProtectedAccounts(db: DB): DB {
 let cache: DB | null = null;
 const listeners = new Set<() => void>();
 
+/** merge saved data over defaults without ever dropping existing records */
+function hydrate(parsed: Partial<DB>): DB {
+  const base = defaultDB();
+  return enforceProtectedAccounts({
+    ...base,
+    ...parsed,
+    branding: { ...base.branding, ...parsed.branding },
+    combos: { ...base.combos, ...parsed.combos },
+    modules: { ...base.modules, ...parsed.modules },
+    employees: parsed.employees ?? [],
+    hrLines: parsed.hrLines ?? [],
+    chat: parsed.chat ?? [],
+    hrRequests: parsed.hrRequests ?? [],
+  });
+}
+
 function load(): DB {
   if (typeof window === "undefined") return defaultDB();
   if (cache) return cache;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as DB;
-      cache = enforceProtectedAccounts({
-        ...defaultDB(),
-        ...parsed,
-        branding: { ...defaultDB().branding, ...parsed.branding },
-        modules: { ...defaultDB().modules, ...parsed.modules },
-      });
-    } else {
-      cache = defaultDB();
-    }
+    cache = raw ? hydrate(JSON.parse(raw) as Partial<DB>) : defaultDB();
   } catch {
     cache = defaultDB();
   }
   return cache!;
 }
 
+/* keep every open tab / user session in sync in real time */
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key && e.key !== KEY) return;
+    cache = null;
+    load();
+    listeners.forEach((l) => l());
+  });
+}
 
 function persist(next: DB) {
   cache = enforceProtectedAccounts(next);
@@ -356,4 +431,60 @@ export function computeStock(mod: ModuleData): StockRow[] {
 export function availableQty(mod: ModuleData, materialName: string, model: string) {
   const row = computeStock(mod).find((r) => r.materialName === materialName && r.model === model);
   return row?.balance ?? 0;
+}
+
+/* ---------------- HR helpers (Day 1) ---------------- */
+
+/** EMP ID format: AL_<year>_EID_<running no.> */
+export function nextEmpId(existing: Employee[]) {
+  const year = new Date().getFullYear();
+  const nums = existing
+    .map((e) => Number(String(e.empId).split("-").pop()?.replace(/\D/g, "")))
+    .filter((n) => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `AL-${year}-EID-${String(next).padStart(4, "0")}`;
+}
+
+export function yearsOfService(dateHired: string) {
+  if (!dateHired) return "—";
+  const from = new Date(dateHired);
+  const now = new Date();
+  if (Number.isNaN(from.getTime()) || from > now) return "—";
+  let years = now.getFullYear() - from.getFullYear();
+  let months = now.getMonth() - from.getMonth();
+  if (now.getDate() < from.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return `${years} yr${years === 1 ? "" : "s"} ${months} mo`;
+}
+
+export function daysUntil(date: string) {
+  if (!date) return null;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
+
+/** Documents expiring within 30 days (or already expired). */
+export function expiryAlerts(employees: Employee[]) {
+  const out: { employee: Employee; doc: string; date: string; days: number }[] = [];
+  employees.forEach((e) => {
+    ([
+      ["Emirates ID", e.emiratesIdExpiry],
+      ["Passport", e.passportExpiry],
+    ] as const).forEach(([doc, date]) => {
+      const days = daysUntil(date);
+      if (days !== null && days <= 30) out.push({ employee: e, doc, date, days });
+    });
+  });
+  return out.sort((a, b) => a.days - b.days);
+}
+
+export function hrTotals(lines: HRLine[], employeeId: string) {
+  const own = lines.filter((l) => l.employeeId === employeeId);
+  const benefits = own.filter((l) => l.kind === "BENEFIT").reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  const deductions = own.filter((l) => l.kind === "DEDUCTION").reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  return { benefits, deductions, net: benefits - deductions };
 }
