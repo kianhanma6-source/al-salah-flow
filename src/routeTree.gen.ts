@@ -13,6 +13,7 @@ import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as MyHrRouteImport } from './routes/my-hr'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
@@ -44,6 +45,11 @@ const UsersRoute = UsersRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyHrRoute = MyHrRouteImport.update({
+  id: '/my-hr',
+  path: '/my-hr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogisticRoute = LogisticRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/my-hr': typeof MyHrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/my-hr': typeof MyHrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/hr-employees': typeof HrEmployeesRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
+  '/my-hr': typeof MyHrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/hr-employees'
     | '/installation'
     | '/logistic'
+    | '/my-hr'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/hr-employees'
     | '/installation'
     | '/logistic'
+    | '/my-hr'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/hr-employees'
     | '/installation'
     | '/logistic'
+    | '/my-hr'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   HrEmployeesRoute: typeof HrEmployeesRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
+  MyHrRoute: typeof MyHrRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-hr': {
+      id: '/my-hr'
+      path: '/my-hr'
+      fullPath: '/my-hr'
+      preLoaderRoute: typeof MyHrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logistic': {
@@ -368,6 +388,7 @@ const rootRouteChildren: RootRouteChildren = {
   HrEmployeesRoute: HrEmployeesRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
+  MyHrRoute: MyHrRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,
