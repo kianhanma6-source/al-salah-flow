@@ -125,6 +125,57 @@ export interface Combos {
   activity: string[];
   wmName: string[];
   wmModel: string[];
+  position: string[];
+}
+
+/* ---------------- HR (Day 1) ---------------- */
+
+export interface Employee {
+  id: string;
+  empId: string;
+  dateEncoded: string;
+  photo: string;
+  fullName: string;
+  position: string;
+  salary: number;
+  emiratesId: string;
+  emiratesIdExpiry: string;
+  passport: string;
+  passportExpiry: string;
+  mobile: string;
+  email: string;
+  address: string;
+  dateHired: string;
+  status: "ACTIVE" | "IN-ACTIVE";
+  /** links this employee record to a login account (optional) */
+  userId?: string;
+}
+
+export interface HRLine {
+  id: string;
+  employeeId: string;
+  kind: "BENEFIT" | "DEDUCTION";
+  description: string;
+  amount: number;
+  date: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  sender: string;
+  role: string;
+  text: string;
+  at: string;
+}
+
+export interface HRRequest {
+  id: string;
+  employeeId: string;
+  type: "ID" | "PAYSLIP" | "COE";
+  note: string;
+  status: "PENDING" | "RELEASED";
+  at: string;
 }
 
 export interface DB {
@@ -133,6 +184,10 @@ export interface DB {
   combos: Combos;
   modules: Record<ModuleKey, ModuleData>;
   accomplishment: AccomplishmentRow[];
+  employees: Employee[];
+  hrLines: HRLine[];
+  chat: ChatMessage[];
+  hrRequests: HRRequest[];
 }
 
 const KEY = "ahas_system_v10";
