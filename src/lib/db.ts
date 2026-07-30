@@ -236,6 +236,7 @@ export const defaultDB = (): DB => ({
     activity: [],
     wmName: [],
     wmModel: [],
+    position: [],
   },
   modules: {
     logistic: emptyModule(),
@@ -245,6 +246,10 @@ export const defaultDB = (): DB => ({
     wmreturn: emptyModule(),
   },
   accomplishment: [],
+  employees: [],
+  hrLines: [],
+  chat: [],
+  hrRequests: [],
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
@@ -260,28 +265,43 @@ export function enforceProtectedAccounts(db: DB): DB {
 let cache: DB | null = null;
 const listeners = new Set<() => void>();
 
+/** merge saved data over defaults without ever dropping existing records */
+function hydrate(parsed: Partial<DB>): DB {
+  const base = defaultDB();
+  return enforceProtectedAccounts({
+    ...base,
+    ...parsed,
+    branding: { ...base.branding, ...parsed.branding },
+    combos: { ...base.combos, ...parsed.combos },
+    modules: { ...base.modules, ...parsed.modules },
+    employees: parsed.employees ?? [],
+    hrLines: parsed.hrLines ?? [],
+    chat: parsed.chat ?? [],
+    hrRequests: parsed.hrRequests ?? [],
+  });
+}
+
 function load(): DB {
   if (typeof window === "undefined") return defaultDB();
   if (cache) return cache;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as DB;
-      cache = enforceProtectedAccounts({
-        ...defaultDB(),
-        ...parsed,
-        branding: { ...defaultDB().branding, ...parsed.branding },
-        modules: { ...defaultDB().modules, ...parsed.modules },
-      });
-    } else {
-      cache = defaultDB();
-    }
+    cache = raw ? hydrate(JSON.parse(raw) as Partial<DB>) : defaultDB();
   } catch {
     cache = defaultDB();
   }
   return cache!;
 }
 
+/* keep every open tab / user session in sync in real time */
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key && e.key !== KEY) return;
+    cache = null;
+    load();
+    listeners.forEach((l) => l());
+  });
+}
 
 function persist(next: DB) {
   cache = enforceProtectedAccounts(next);
