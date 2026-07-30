@@ -89,6 +89,10 @@ export type TabKey =
   | "wm"
   | "wmreturn"
   | "accomplishment"
+  | "hr"
+  | "hrbenefits"
+  | "myhr"
+  | "chat"
   | "backup"
   | "cleaning"
   | "branding";
@@ -101,6 +105,10 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "wm", label: "WM Deployment" },
   { key: "wmreturn", label: "WM Returned / Scrap" },
   { key: "accomplishment", label: "Accomplishment" },
+  { key: "hr", label: "Employee Information" },
+  { key: "hrbenefits", label: "Benefits & Deductions" },
+  { key: "myhr", label: "My HR Dashboard" },
+  { key: "chat", label: "Group Chat" },
   { key: "users", label: "User Management" },
   { key: "backup", label: "Backup & Data" },
   { key: "cleaning", label: "Data Cleaning" },
@@ -110,29 +118,34 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
 const EVERY: TabKey[] = ALL_TABS.map((t) => t.key);
 const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
 
+/** HR modules are restricted to HR Admin + programmers. */
+const NO_HR: TabKey[] = ["hr", "hrbenefits"];
+/** Personal HR dashboard + group chat: everyone except clients. */
+const PERSONAL: TabKey[] = ["dashboard", "myhr", "chat"];
+
 /** Default dashboards per role (NAD ITALLO can override per user). */
 const ACCESS: Record<string, TabKey[]> = {
   "PROGRAMMER-IV": EVERY,
   PROGRAMMER: without("branding"),
-  "Logistic Admin": without("branding", "cleaning"),
-  "Logistic User": without("branding", "cleaning", "users"),
-  "Warehouse Admin": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment"),
-  "Warehouse User": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", "users"),
-  Manager: ["dashboard"],
-  "HR Admin": ["dashboard"],
-  "Sales Person": ["dashboard"],
-  Technician: ["dashboard"],
-  "Collection Team": ["dashboard"],
+  "Logistic Admin": without("branding", "cleaning", ...NO_HR),
+  "Logistic User": without("branding", "cleaning", "users", ...NO_HR),
+  "Warehouse Admin": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", ...NO_HR),
+  "Warehouse User": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", "users", ...NO_HR),
+  Manager: PERSONAL,
+  "HR Admin": ["dashboard", "hr", "hrbenefits", "myhr", "chat"],
+  "Sales Person": PERSONAL,
+  Technician: PERSONAL,
+  "Collection Team": PERSONAL,
   Client: ["dashboard"],
-  Viewer: ["dashboard"],
+  Viewer: PERSONAL,
   /* legacy */
-  ADMIN: without("branding", "cleaning"),
-  USER: without("branding", "cleaning", "users"),
+  ADMIN: without("branding", "cleaning", ...NO_HR),
+  USER: without("branding", "cleaning", "users", ...NO_HR),
   VISITOR: ["dashboard"],
-  "Collection team": ["dashboard"],
-  Sales: ["dashboard"],
-  "WM Deployment": ["dashboard"],
-  Logistic: without("branding", "cleaning"),
+  "Collection team": PERSONAL,
+  Sales: PERSONAL,
+  "WM Deployment": PERSONAL,
+  Logistic: without("branding", "cleaning", ...NO_HR),
 };
 
 const PROG: Role[] = ["PROGRAMMER-IV", "PROGRAMMER"];
