@@ -57,7 +57,8 @@ export async function toLogoBase64(file: File, max = 512): Promise<string> {
   return canvas.toDataURL("image/png");
 }
 
-/** Crop any image (base64/url) into a circle with a soft 3D ring — returns PNG base64. */
+/** Fit any image (base64/url) fully inside a circle with a soft 3D ring — returns PNG base64.
+ *  The whole logo is contained (never cropped) and no square edges/background remain. */
 export async function toCircleBase64(src: string, px = 512): Promise<string> {
   const img = await new Promise<HTMLImageElement>((res, rej) => {
     const i = new Image();
@@ -70,28 +71,31 @@ export async function toCircleBase64(src: string, px = 512): Promise<string> {
   canvas.width = px;
   canvas.height = px;
   const ctx = canvas.getContext("2d")!;
+  const r = px / 2 - 6;
   ctx.save();
   ctx.beginPath();
-  ctx.arc(px / 2, px / 2, px / 2 - 8, 0, Math.PI * 2);
+  ctx.arc(px / 2, px / 2, r, 0, Math.PI * 2);
   ctx.closePath();
   ctx.clip();
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, px, px);
-  const side = Math.min(img.width, img.height);
-  const sx = (img.width - side) / 2;
-  const sy = (img.height - side) / 2;
-  const pad = px * 0.08;
-  ctx.drawImage(img, sx, sy, side, side, pad, pad, px - pad * 2, px - pad * 2);
+  // contain-fit so the entire logo is visible inside the circle
+  const box = r * 1.42; // inscribed square inside the circle
+  const scale = Math.min(box / img.width, box / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  ctx.drawImage(img, (px - w) / 2, (px - h) / 2, w, h);
   ctx.restore();
-  ctx.lineWidth = 10;
+  ctx.lineWidth = 8;
   ctx.strokeStyle = "rgba(20,60,110,0.85)";
   ctx.beginPath();
-  ctx.arc(px / 2, px / 2, px / 2 - 8, 0, Math.PI * 2);
+  ctx.arc(px / 2, px / 2, r, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 3;
   ctx.strokeStyle = "rgba(255,255,255,0.7)";
   ctx.beginPath();
-  ctx.arc(px / 2, px / 2, px / 2 - 16, Math.PI * 0.9, Math.PI * 1.9);
+  ctx.arc(px / 2, px / 2, r - 7, Math.PI * 0.9, Math.PI * 1.9);
   ctx.stroke();
   return canvas.toDataURL("image/png");
+
 }
