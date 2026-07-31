@@ -26,29 +26,32 @@ const TABS: { key: TabKey; to: string; label: string }[] = [
 export function ReportHeader() {
   const { branding } = useDB();
   return (
-    <div className="panel-3d flex flex-col items-center gap-3 px-4 py-5 text-center">
-      <div className="relative">
-        <div className="absolute -inset-2 rounded-full bg-primary/25 blur-xl" />
-        <img
-          src={branding.logo || defaultLogo}
-          alt="Company logo"
-          width={88}
-          height={88}
-          className="relative size-22 rounded-full border-2 border-primary/60 bg-white/90 object-contain p-1.5 shadow-[0_10px_22px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.75)]"
-        />
-      </div>
-      <div>
-        <h1 className="display text-base font-bold tracking-wide sm:text-xl">
-          {branding.companyName}
-        </h1>
-        <p className="text-xs text-muted-foreground">{branding.addressLine1}</p>
-        <p className="text-xs text-muted-foreground">{branding.addressLine2}</p>
-        <p className="text-xs text-muted-foreground">{branding.contact}</p>
-        {branding.email && <p className="text-xs text-muted-foreground">{branding.email}</p>}
+    <div className="panel-3d px-4 py-4">
+      <div className="flex items-center gap-4">
+        <div className="relative shrink-0">
+          <div className="absolute -inset-1.5 rounded-full bg-primary/25 blur-lg" />
+          <img
+            src={branding.logo || defaultLogo}
+            alt="Company logo"
+            width={64}
+            height={64}
+            className="relative size-16 rounded-full border-2 border-primary/60 bg-white object-contain p-1 shadow-[0_8px_18px_rgba(0,0,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)]"
+          />
+        </div>
+        <div className="min-w-0">
+          <h1 className="display text-sm font-bold leading-tight tracking-wide sm:text-lg">
+            {branding.companyName}
+          </h1>
+          <p className="text-[11px] text-muted-foreground">{branding.addressLine1}</p>
+          <p className="text-[11px] text-muted-foreground">{branding.addressLine2}</p>
+          <p className="text-[11px] text-muted-foreground">{branding.contact}</p>
+          {branding.email && <p className="text-[11px] text-muted-foreground">{branding.email}</p>}
+        </div>
       </div>
     </div>
   );
 }
+
 
 
 export function AppShell({ tab, children }: { tab: TabKey; children: ReactNode }) {
