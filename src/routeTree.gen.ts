@@ -17,6 +17,7 @@ import { Route as PayrollRouteImport } from './routes/payroll'
 import { Route as MyHrRouteImport } from './routes/my-hr'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as IdCardRouteImport } from './routes/id-card'
 import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
@@ -67,6 +68,11 @@ const LogisticRoute = LogisticRouteImport.update({
 const InstallationRoute = InstallationRouteImport.update({
   id: '/installation',
   path: '/installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdCardRoute = IdCardRouteImport.update({
+  id: '/id-card',
+  path: '/id-card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HrEmployeesRoute = HrEmployeesRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
@@ -267,6 +279,7 @@ export interface RootRouteChildren {
   DataCleaningRoute: typeof DataCleaningRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
   HrEmployeesRoute: typeof HrEmployeesRoute
+  IdCardRoute: typeof IdCardRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
   MyHrRoute: typeof MyHrRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/installation'
       fullPath: '/installation'
       preLoaderRoute: typeof InstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/id-card': {
+      id: '/id-card'
+      path: '/id-card'
+      fullPath: '/id-card'
+      preLoaderRoute: typeof IdCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hr-employees': {
@@ -427,6 +447,7 @@ const rootRouteChildren: RootRouteChildren = {
   DataCleaningRoute: DataCleaningRoute,
   HrBenefitsRoute: HrBenefitsRoute,
   HrEmployeesRoute: HrEmployeesRoute,
+  IdCardRoute: IdCardRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
   MyHrRoute: MyHrRoute,
