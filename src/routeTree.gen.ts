@@ -21,6 +21,7 @@ import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CoeRouteImport } from './routes/coe'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
@@ -88,6 +89,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoeRoute = CoeRouteImport.update({
+  id: '/coe',
+  path: '/coe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
   ChatRoute: typeof ChatRoute
+  CoeRoute: typeof CoeRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coe': {
+      id: '/coe'
+      path: '/coe'
+      fullPath: '/coe'
+      preLoaderRoute: typeof CoeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
   ChatRoute: ChatRoute,
+  CoeRoute: CoeRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
   HrBenefitsRoute: HrBenefitsRoute,
