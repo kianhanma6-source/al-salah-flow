@@ -137,20 +137,14 @@ export function restoreJson(file: File) {
   });
 }
 
-/** Branded PDF: round 3D logo centered above the company block, table body, signatories + version footer.
- *  Pass `photos` (one entry per row, base64) to print the saved pictures inside the report. */
-export async function exportPDF(
+/** Shared branded header for every generated document:
+ *  [ROUND LOGO] COMPANY NAME side by side, address / contact / email below the name,
+ *  report title below the header block. Returns the Y position after the header. */
+export async function drawReportHeader(
+  doc: jsPDF,
   title: string,
-  columns: string[],
-  rows: (string | number)[][],
-  b?: Branding,
-  photos?: (string | undefined)[],
-) {
-  const brand = b ?? getDB().branding;
-  const withPhotos = !!photos?.some(Boolean);
-  const cols = withPhotos ? ["Photo", ...columns] : columns;
-  const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
-  const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
+  brand: Branding = getDB().branding,
+): Promise<number> {
   const w = doc.internal.pageSize.getWidth();
   const top = 12;
 
@@ -163,7 +157,6 @@ export async function exportPDF(
     }
   }
 
-  // [LOGO] COMPANY NAME — side by side, logo on the left, name vertically centered
   const size = 20;
   const left = 14;
   if (round) {
@@ -192,9 +185,42 @@ export async function exportPDF(
   doc.setLineWidth(0.6);
   doc.line(left, y + 1, w - left, y + 1);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text(title.toUpperCase(), w / 2, y + 8, { align: "center" });
+  if (title) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(title.toUpperCase(), w / 2, y + 8, { align: "center" });
+  }
+  return y + 8;
+}
+
+/** Standard footer: signatories + programmer version tag. */
+export function drawReportFooter(doc: jsPDF, brand: Branding = getDB().branding) {
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(brand.signatory1, 14, h - 14);
+  doc.text(brand.signatory2, 14, h - 8);
+  doc.text("NAD ITALLO-PROGRAMMER v10.0", w - 14, h - 8, { align: "right" });
+}
+
+/** Branded PDF: logo left + company name beside it, table body, signatories + version footer.
+ *  Pass `photos` (one entry per row, base64) to print the saved pictures inside the report. */
+export async function exportPDF(
+  title: string,
+  columns: string[],
+  rows: (string | number)[][],
+  b?: Branding,
+  photos?: (string | undefined)[],
+) {
+  const brand = b ?? getDB().branding;
+  const withPhotos = !!photos?.some(Boolean);
+  const cols = withPhotos ? ["Photo", ...columns] : columns;
+  const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
+  const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
+  const y = await drawReportHeader(doc, title, brand);
+
+
 
 
   autoTable(doc, {
