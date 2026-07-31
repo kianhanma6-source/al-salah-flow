@@ -289,6 +289,8 @@ export const defaultDB = (): DB => ({
   hrLines: [],
   chat: [],
   hrRequests: [],
+  payroll: [],
+  signatures: [],
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
