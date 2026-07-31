@@ -319,6 +319,8 @@ function hydrate(parsed: Partial<DB>): DB {
     hrLines: parsed.hrLines ?? [],
     chat: parsed.chat ?? [],
     hrRequests: parsed.hrRequests ?? [],
+    payroll: parsed.payroll ?? [],
+    signatures: parsed.signatures ?? [],
   });
 }
 
