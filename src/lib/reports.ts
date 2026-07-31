@@ -152,7 +152,7 @@ export async function exportPDF(
   const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
   const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
   const w = doc.internal.pageSize.getWidth();
-  const top = 10;
+  const top = 12;
 
   let round = "";
   if (brand.logo) {
@@ -163,28 +163,39 @@ export async function exportPDF(
     }
   }
 
-  const size = 24;
+  // [LOGO] COMPANY NAME — side by side, logo on the left, name vertically centered
+  const size = 20;
+  const left = 14;
   if (round) {
     try {
-      doc.addImage(round, "PNG", w / 2 - size / 2, top, size, size);
+      doc.addImage(round, "PNG", left, top, size, size);
     } catch {
       /* ignore */
     }
   }
-
-  const y = top + (round ? size + 7 : 8);
+  const textX = round ? left + size + 6 : left;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(brand.companyName, w / 2, y, { align: "center" });
+  doc.text(brand.companyName, textX, top + (round ? size / 2 + 1.5 : 5));
+
+  let y = top + (round ? size + 6 : 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(brand.addressLine1, w / 2, y + 5, { align: "center" });
-  doc.text(brand.addressLine2, w / 2, y + 10, { align: "center" });
-  doc.text(brand.contact, w / 2, y + 15, { align: "center" });
-  if (brand.email) doc.text(brand.email, w / 2, y + 20, { align: "center" });
+  [brand.addressLine1, brand.addressLine2, brand.contact, brand.email]
+    .filter(Boolean)
+    .forEach((line) => {
+      doc.text(String(line), textX, y);
+      y += 5;
+    });
+
+  doc.setDrawColor(17, 46, 82);
+  doc.setLineWidth(0.6);
+  doc.line(left, y + 1, w - left, y + 1);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text(title.toUpperCase(), w / 2, y + (brand.email ? 29 : 24), { align: "center" });
+  doc.text(title.toUpperCase(), w / 2, y + 8, { align: "center" });
+
 
   autoTable(doc, {
     startY: y + (brand.email ? 34 : 29),
