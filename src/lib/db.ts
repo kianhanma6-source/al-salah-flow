@@ -178,6 +178,42 @@ export interface HRRequest {
   at: string;
 }
 
+/* ---------------- Payroll (Day 2) ---------------- */
+
+export interface PayrollRow {
+  id: string;
+  employeeId: string;
+  empId: string;
+  name: string;
+  position: string;
+  basic: number;
+  benefits: number;
+  bonus: number;
+  incentive: number;
+  workingDays: number;
+  absentDays: number;
+  absentDeduction: number;
+  otherDeduction: number;
+  net: number;
+}
+
+export type PayrollStatus = "DRAFT" | "APPROVED" | "LOCKED";
+
+export interface PayrollRun {
+  id: string;
+  month: number; // 1-12
+  year: number;
+  status: PayrollStatus;
+  rows: PayrollRow[];
+  createdAt: string;
+}
+
+export interface Signature {
+  id: string;
+  name: string;
+  position: string;
+}
+
 export interface DB {
   branding: Branding;
   users: User[];
@@ -188,7 +224,10 @@ export interface DB {
   hrLines: HRLine[];
   chat: ChatMessage[];
   hrRequests: HRRequest[];
+  payroll: PayrollRun[];
+  signatures: Signature[];
 }
+
 
 const KEY = "ahas_system_v10";
 
