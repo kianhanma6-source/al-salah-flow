@@ -137,7 +137,74 @@ export function restoreJson(file: File) {
   });
 }
 
-/** Branded PDF: round 3D logo centered above the company block, table body, signatories + version footer.
+/** Shared branded header for every generated document:
+ *  [ROUND LOGO] COMPANY NAME side by side, address / contact / email below the name,
+ *  report title below the header block. Returns the Y position after the header. */
+export async function drawReportHeader(
+  doc: jsPDF,
+  title: string,
+  brand: Branding = getDB().branding,
+): Promise<number> {
+  const w = doc.internal.pageSize.getWidth();
+  const top = 12;
+
+  let round = "";
+  if (brand.logo) {
+    try {
+      round = await toCircleBase64(brand.logo, 512);
+    } catch {
+      round = "";
+    }
+  }
+
+  const size = 20;
+  const left = 14;
+  if (round) {
+    try {
+      doc.addImage(round, "PNG", left, top, size, size);
+    } catch {
+      /* ignore */
+    }
+  }
+  const textX = round ? left + size + 6 : left;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(brand.companyName, textX, top + (round ? size / 2 + 1.5 : 5));
+
+  let y = top + (round ? size + 6 : 12);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  [brand.addressLine1, brand.addressLine2, brand.contact, brand.email]
+    .filter(Boolean)
+    .forEach((line) => {
+      doc.text(String(line), textX, y);
+      y += 5;
+    });
+
+  doc.setDrawColor(17, 46, 82);
+  doc.setLineWidth(0.6);
+  doc.line(left, y + 1, w - left, y + 1);
+
+  if (title) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(title.toUpperCase(), w / 2, y + 8, { align: "center" });
+  }
+  return y + 8;
+}
+
+/** Standard footer: signatories + programmer version tag. */
+export function drawReportFooter(doc: jsPDF, brand: Branding = getDB().branding) {
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(brand.signatory1, 14, h - 14);
+  doc.text(brand.signatory2, 14, h - 8);
+  doc.text("NAD ITALLO-PROGRAMMER v10.0", w - 14, h - 8, { align: "right" });
+}
+
+/** Branded PDF: logo left + company name beside it, table body, signatories + version footer.
  *  Pass `photos` (one entry per row, base64) to print the saved pictures inside the report. */
 export async function exportPDF(
   title: string,
@@ -151,43 +218,13 @@ export async function exportPDF(
   const cols = withPhotos ? ["Photo", ...columns] : columns;
   const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
   const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
-  const w = doc.internal.pageSize.getWidth();
-  const top = 10;
+  const y = await drawReportHeader(doc, title, brand);
 
-  let round = "";
-  if (brand.logo) {
-    try {
-      round = await toCircleBase64(brand.logo, 512);
-    } catch {
-      round = "";
-    }
-  }
 
-  const size = 24;
-  if (round) {
-    try {
-      doc.addImage(round, "PNG", w / 2 - size / 2, top, size, size);
-    } catch {
-      /* ignore */
-    }
-  }
 
-  const y = top + (round ? size + 7 : 8);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text(brand.companyName, w / 2, y, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(brand.addressLine1, w / 2, y + 5, { align: "center" });
-  doc.text(brand.addressLine2, w / 2, y + 10, { align: "center" });
-  doc.text(brand.contact, w / 2, y + 15, { align: "center" });
-  if (brand.email) doc.text(brand.email, w / 2, y + 20, { align: "center" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text(title.toUpperCase(), w / 2, y + (brand.email ? 29 : 24), { align: "center" });
 
   autoTable(doc, {
-    startY: y + (brand.email ? 34 : 29),
+    startY: y + 13,
     head: [cols],
     body: body.length ? body : [cols.map(() => "-")],
     styles: { fontSize: 8, cellPadding: 2, minCellHeight: withPhotos ? 16 : undefined },
@@ -203,14 +240,7 @@ export async function exportPDF(
         /* ignore unsupported image */
       }
     },
-    didDrawPage: () => {
-      const h = doc.internal.pageSize.getHeight();
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
-      doc.text(brand.signatory1, 14, h - 14);
-      doc.text(brand.signatory2, 14, h - 8);
-      doc.text("NAD ITALLO-PROGRAMMER v10.0", w - 14, h - 8, { align: "right" });
-    },
+    didDrawPage: () => drawReportFooter(doc, brand),
   });
 
   doc.save(`${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);

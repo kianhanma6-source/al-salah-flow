@@ -178,6 +178,42 @@ export interface HRRequest {
   at: string;
 }
 
+/* ---------------- Payroll (Day 2) ---------------- */
+
+export interface PayrollRow {
+  id: string;
+  employeeId: string;
+  empId: string;
+  name: string;
+  position: string;
+  basic: number;
+  benefits: number;
+  bonus: number;
+  incentive: number;
+  workingDays: number;
+  absentDays: number;
+  absentDeduction: number;
+  otherDeduction: number;
+  net: number;
+}
+
+export type PayrollStatus = "DRAFT" | "APPROVED" | "LOCKED";
+
+export interface PayrollRun {
+  id: string;
+  month: number; // 1-12
+  year: number;
+  status: PayrollStatus;
+  rows: PayrollRow[];
+  createdAt: string;
+}
+
+export interface Signature {
+  id: string;
+  name: string;
+  position: string;
+}
+
 export interface DB {
   branding: Branding;
   users: User[];
@@ -188,7 +224,10 @@ export interface DB {
   hrLines: HRLine[];
   chat: ChatMessage[];
   hrRequests: HRRequest[];
+  payroll: PayrollRun[];
+  signatures: Signature[];
 }
+
 
 const KEY = "ahas_system_v10";
 
@@ -250,6 +289,8 @@ export const defaultDB = (): DB => ({
   hrLines: [],
   chat: [],
   hrRequests: [],
+  payroll: [],
+  signatures: [],
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
@@ -278,6 +319,8 @@ function hydrate(parsed: Partial<DB>): DB {
     hrLines: parsed.hrLines ?? [],
     chat: parsed.chat ?? [],
     hrRequests: parsed.hrRequests ?? [],
+    payroll: parsed.payroll ?? [],
+    signatures: parsed.signatures ?? [],
   });
 }
 
@@ -487,4 +530,40 @@ export function hrTotals(lines: HRLine[], employeeId: string) {
   const benefits = own.filter((l) => l.kind === "BENEFIT").reduce((s, l) => s + (Number(l.amount) || 0), 0);
   const deductions = own.filter((l) => l.kind === "DEDUCTION").reduce((s, l) => s + (Number(l.amount) || 0), 0);
   return { benefits, deductions, net: benefits - deductions };
+}
+
+/* ---------------- Payroll helpers (Day 2) ---------------- */
+
+export const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Working days in a month = all calendar days except Fridays (UAE rest day). */
+export function workingDaysInMonth(year: number, month: number) {
+  const days = new Date(year, month, 0).getDate();
+  let count = 0;
+  for (let d = 1; d <= days; d++) if (new Date(year, month - 1, d).getDay() !== 5) count++;
+  return count;
+}
+
+/** Sales personnel are exempt from absence deductions — always full salary. */
+export function isSalesExempt(position: string, role?: string) {
+  const p = `${position} ${role ?? ""}`.toLowerCase();
+  return p.includes("sales");
+}
+
+export function computeNet(r: PayrollRow) {
+  return (
+    (Number(r.basic) || 0) +
+    (Number(r.benefits) || 0) +
+    (Number(r.bonus) || 0) +
+    (Number(r.incentive) || 0) -
+    (Number(r.absentDeduction) || 0) -
+    (Number(r.otherDeduction) || 0)
+  );
+}
+
+export function dailyRate(basic: number, workingDays: number) {
+  return workingDays > 0 ? (Number(basic) || 0) / workingDays : 0;
 }

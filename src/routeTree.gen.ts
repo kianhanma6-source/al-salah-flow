@@ -13,13 +13,16 @@ import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PayrollRouteImport } from './routes/payroll'
 import { Route as MyHrRouteImport } from './routes/my-hr'
 import { Route as LogisticRouteImport } from './routes/logistic'
 import { Route as InstallationRouteImport } from './routes/installation'
+import { Route as IdCardRouteImport } from './routes/id-card'
 import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CoeRouteImport } from './routes/coe'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
@@ -47,6 +50,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PayrollRoute = PayrollRouteImport.update({
+  id: '/payroll',
+  path: '/payroll',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MyHrRoute = MyHrRouteImport.update({
   id: '/my-hr',
   path: '/my-hr',
@@ -60,6 +68,11 @@ const LogisticRoute = LogisticRouteImport.update({
 const InstallationRoute = InstallationRouteImport.update({
   id: '/installation',
   path: '/installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdCardRoute = IdCardRouteImport.update({
+  id: '/id-card',
+  path: '/id-card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HrEmployeesRoute = HrEmployeesRouteImport.update({
@@ -80,6 +93,11 @@ const DataCleaningRoute = DataCleaningRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoeRoute = CoeRouteImport.update({
+  id: '/coe',
+  path: '/coe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -120,13 +138,16 @@ export interface FileRoutesByFullPath {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
+  '/payroll': typeof PayrollRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -139,13 +160,16 @@ export interface FileRoutesByTo {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
+  '/payroll': typeof PayrollRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -159,13 +183,16 @@ export interface FileRoutesById {
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
   '/chat': typeof ChatRoute
+  '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
+  '/id-card': typeof IdCardRoute
   '/installation': typeof InstallationRoute
   '/logistic': typeof LogisticRoute
   '/my-hr': typeof MyHrRoute
+  '/payroll': typeof PayrollRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -180,13 +207,16 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
+    | '/payroll'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -199,13 +229,16 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
+    | '/payroll'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -218,13 +251,16 @@ export interface FileRouteTypes {
     | '/board'
     | '/branding'
     | '/chat'
+    | '/coe'
     | '/dashboard'
     | '/data-cleaning'
     | '/hr-benefits'
     | '/hr-employees'
+    | '/id-card'
     | '/installation'
     | '/logistic'
     | '/my-hr'
+    | '/payroll'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -238,13 +274,16 @@ export interface RootRouteChildren {
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
   ChatRoute: typeof ChatRoute
+  CoeRoute: typeof CoeRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
   HrEmployeesRoute: typeof HrEmployeesRoute
+  IdCardRoute: typeof IdCardRoute
   InstallationRoute: typeof InstallationRoute
   LogisticRoute: typeof LogisticRoute
   MyHrRoute: typeof MyHrRoute
+  PayrollRoute: typeof PayrollRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
@@ -281,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payroll': {
+      id: '/payroll'
+      path: '/payroll'
+      fullPath: '/payroll'
+      preLoaderRoute: typeof PayrollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/my-hr': {
       id: '/my-hr'
       path: '/my-hr'
@@ -300,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/installation'
       fullPath: '/installation'
       preLoaderRoute: typeof InstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/id-card': {
+      id: '/id-card'
+      path: '/id-card'
+      fullPath: '/id-card'
+      preLoaderRoute: typeof IdCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hr-employees': {
@@ -328,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coe': {
+      id: '/coe'
+      path: '/coe'
+      fullPath: '/coe'
+      preLoaderRoute: typeof CoeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -382,13 +442,16 @@ const rootRouteChildren: RootRouteChildren = {
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
   ChatRoute: ChatRoute,
+  CoeRoute: CoeRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
   HrBenefitsRoute: HrBenefitsRoute,
   HrEmployeesRoute: HrEmployeesRoute,
+  IdCardRoute: IdCardRoute,
   InstallationRoute: InstallationRoute,
   LogisticRoute: LogisticRoute,
   MyHrRoute: MyHrRoute,
+  PayrollRoute: PayrollRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,
