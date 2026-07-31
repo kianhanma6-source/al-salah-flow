@@ -198,7 +198,7 @@ export async function exportPDF(
 
 
   autoTable(doc, {
-    startY: y + (brand.email ? 34 : 29),
+    startY: y + 13,
     head: [cols],
     body: body.length ? body : [cols.map(() => "-")],
     styles: { fontSize: 8, cellPadding: 2, minCellHeight: withPhotos ? 16 : undefined },
