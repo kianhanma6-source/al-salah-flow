@@ -240,14 +240,7 @@ export async function exportPDF(
         /* ignore unsupported image */
       }
     },
-    didDrawPage: () => {
-      const h = doc.internal.pageSize.getHeight();
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
-      doc.text(brand.signatory1, 14, h - 14);
-      doc.text(brand.signatory2, 14, h - 8);
-      doc.text("NAD ITALLO-PROGRAMMER v10.0", w - 14, h - 8, { align: "right" });
-    },
+    didDrawPage: () => drawReportFooter(doc, brand),
   });
 
   doc.save(`${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
