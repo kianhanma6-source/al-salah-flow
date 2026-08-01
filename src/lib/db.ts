@@ -214,6 +214,41 @@ export interface Signature {
   position: string;
 }
 
+/* ---------------- Attendance + GPS (Day 3) ---------------- */
+
+export interface GpsPoint {
+  at: string;
+  lat: number;
+  lng: number;
+  acc?: number;
+  address?: string;
+  /** false when captured offline and not yet uploaded */
+  synced?: boolean;
+}
+
+export type AttendanceStatus =
+  | "ON DUTY"
+  | "COMPLETED"
+  | "EARLY OUT PENDING"
+  | "EARLY OUT APPROVED";
+
+export interface AttendanceRow {
+  id: string;
+  date: string;
+  employeeId: string;
+  empId: string;
+  name: string;
+  photo: string;
+  team: string;
+  plate: string;
+  shift: string;
+  timeIn: string;
+  timeOut: string;
+  status: AttendanceStatus;
+  signature: string;
+  route: GpsPoint[];
+}
+
 export interface DB {
   branding: Branding;
   users: User[];
