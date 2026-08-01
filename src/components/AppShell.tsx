@@ -18,6 +18,8 @@ const TABS: { key: TabKey; to: string; label: string }[] = [
   { key: "payroll", to: "/payroll", label: "Payroll" },
   { key: "coe", to: "/coe", label: "COE" },
   { key: "idcard", to: "/id-card", label: "Employee ID" },
+  { key: "attendance", to: "/attendance", label: "Daily Attendance" },
+  { key: "gps", to: "/gps-monitor", label: "GPS Monitoring" },
   { key: "myhr", to: "/my-hr", label: "My HR" },
   { key: "chat", to: "/chat", label: "Group Chat" },
   { key: "users", to: "/users", label: "User Management" },

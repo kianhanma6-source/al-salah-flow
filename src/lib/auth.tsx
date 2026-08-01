@@ -95,6 +95,8 @@ export type TabKey =
   | "payroll"
   | "coe"
   | "idcard"
+  | "attendance"
+  | "gps"
   | "chat"
   | "backup"
   | "cleaning"
@@ -113,6 +115,8 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "payroll", label: "Payroll" },
   { key: "coe", label: "Certificate of Employment" },
   { key: "idcard", label: "Employee ID Card" },
+  { key: "attendance", label: "Daily Attendance" },
+  { key: "gps", label: "GPS Monitoring" },
   { key: "myhr", label: "My HR Dashboard" },
   { key: "chat", label: "Group Chat" },
   { key: "users", label: "User Management" },
@@ -125,9 +129,9 @@ const EVERY: TabKey[] = ALL_TABS.map((t) => t.key);
 const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
 
 /** HR modules are restricted to HR Admin + programmers. */
-const NO_HR: TabKey[] = ["hr", "hrbenefits", "payroll", "coe", "idcard"];
+const NO_HR: TabKey[] = ["hr", "hrbenefits", "payroll", "coe", "idcard", "gps"];
 /** Personal HR dashboard + group chat: everyone except clients. */
-const PERSONAL: TabKey[] = ["dashboard", "myhr", "chat"];
+const PERSONAL: TabKey[] = ["dashboard", "myhr", "chat", "attendance"];
 
 /** Default dashboards per role (NAD ITALLO can override per user). */
 const ACCESS: Record<string, TabKey[]> = {
@@ -137,13 +141,13 @@ const ACCESS: Record<string, TabKey[]> = {
   "Logistic User": without("branding", "cleaning", "users", ...NO_HR),
   "Warehouse Admin": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", ...NO_HR),
   "Warehouse User": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", "users", ...NO_HR),
-  Manager: PERSONAL,
-  "HR Admin": ["dashboard", "hr", "hrbenefits", "payroll", "coe", "idcard", "myhr", "chat"],
+  Manager: [...PERSONAL, "gps"],
+  "HR Admin": ["dashboard", "hr", "hrbenefits", "payroll", "coe", "idcard", "myhr", "chat", "attendance", "gps"],
   "Sales Person": PERSONAL,
   Technician: PERSONAL,
   "Collection Team": PERSONAL,
   Client: ["dashboard"],
-  Viewer: PERSONAL,
+  Viewer: ["dashboard", "myhr", "chat"],
   /* legacy */
   ADMIN: without("branding", "cleaning", ...NO_HR),
   USER: without("branding", "cleaning", "users", ...NO_HR),

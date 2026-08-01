@@ -20,6 +20,7 @@ import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as IdCardRouteImport } from './routes/id-card'
 import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
+import { Route as GpsMonitorRouteImport } from './routes/gps-monitor'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CoeRouteImport } from './routes/coe'
@@ -86,6 +87,11 @@ const HrBenefitsRoute = HrBenefitsRouteImport.update({
   path: '/hr-benefits',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GpsMonitorRoute = GpsMonitorRouteImport.update({
+  id: '/gps-monitor',
+  path: '/gps-monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DataCleaningRoute = DataCleaningRouteImport.update({
   id: '/data-cleaning',
   path: '/data-cleaning',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -290,6 +302,7 @@ export interface RootRouteChildren {
   CoeRoute: typeof CoeRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
+  GpsMonitorRoute: typeof GpsMonitorRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
   HrEmployeesRoute: typeof HrEmployeesRoute
   IdCardRoute: typeof IdCardRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrBenefitsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gps-monitor': {
+      id: '/gps-monitor'
+      path: '/gps-monitor'
+      fullPath: '/gps-monitor'
+      preLoaderRoute: typeof GpsMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/data-cleaning': {
       id: '/data-cleaning'
       path: '/data-cleaning'
@@ -466,6 +486,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoeRoute: CoeRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
+  GpsMonitorRoute: GpsMonitorRoute,
   HrBenefitsRoute: HrBenefitsRoute,
   HrEmployeesRoute: HrEmployeesRoute,
   IdCardRoute: IdCardRoute,
