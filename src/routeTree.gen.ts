@@ -20,6 +20,7 @@ import { Route as InstallationRouteImport } from './routes/installation'
 import { Route as IdCardRouteImport } from './routes/id-card'
 import { Route as HrEmployeesRouteImport } from './routes/hr-employees'
 import { Route as HrBenefitsRouteImport } from './routes/hr-benefits'
+import { Route as GpsMonitorRouteImport } from './routes/gps-monitor'
 import { Route as DataCleaningRouteImport } from './routes/data-cleaning'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CoeRouteImport } from './routes/coe'
@@ -27,6 +28,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as BackupRouteImport } from './routes/backup'
+import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as AccomplishmentRouteImport } from './routes/accomplishment'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -85,6 +87,11 @@ const HrBenefitsRoute = HrBenefitsRouteImport.update({
   path: '/hr-benefits',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GpsMonitorRoute = GpsMonitorRouteImport.update({
+  id: '/gps-monitor',
+  path: '/gps-monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DataCleaningRoute = DataCleaningRouteImport.update({
   id: '/data-cleaning',
   path: '/data-cleaning',
@@ -120,6 +127,11 @@ const BackupRoute = BackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendanceRoute = AttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccomplishmentRoute = AccomplishmentRouteImport.update({
   id: '/accomplishment',
   path: '/accomplishment',
@@ -134,6 +146,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -141,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -156,6 +170,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -163,6 +178,7 @@ export interface FileRoutesByTo {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -179,6 +195,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -186,6 +203,7 @@ export interface FileRoutesById {
   '/coe': typeof CoeRoute
   '/dashboard': typeof DashboardRoute
   '/data-cleaning': typeof DataCleaningRoute
+  '/gps-monitor': typeof GpsMonitorRoute
   '/hr-benefits': typeof HrBenefitsRoute
   '/hr-employees': typeof HrEmployeesRoute
   '/id-card': typeof IdCardRoute
@@ -203,6 +221,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -210,6 +229,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -225,6 +245,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -232,6 +253,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -247,6 +269,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -254,6 +277,7 @@ export interface FileRouteTypes {
     | '/coe'
     | '/dashboard'
     | '/data-cleaning'
+    | '/gps-monitor'
     | '/hr-benefits'
     | '/hr-employees'
     | '/id-card'
@@ -270,6 +294,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccomplishmentRoute: typeof AccomplishmentRoute
+  AttendanceRoute: typeof AttendanceRoute
   BackupRoute: typeof BackupRoute
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
@@ -277,6 +302,7 @@ export interface RootRouteChildren {
   CoeRoute: typeof CoeRoute
   DashboardRoute: typeof DashboardRoute
   DataCleaningRoute: typeof DataCleaningRoute
+  GpsMonitorRoute: typeof GpsMonitorRoute
   HrBenefitsRoute: typeof HrBenefitsRoute
   HrEmployeesRoute: typeof HrEmployeesRoute
   IdCardRoute: typeof IdCardRoute
@@ -369,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrBenefitsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gps-monitor': {
+      id: '/gps-monitor'
+      path: '/gps-monitor'
+      fullPath: '/gps-monitor'
+      preLoaderRoute: typeof GpsMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/data-cleaning': {
       id: '/data-cleaning'
       path: '/data-cleaning'
@@ -418,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendance': {
+      id: '/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/accomplishment': {
       id: '/accomplishment'
       path: '/accomplishment'
@@ -438,6 +478,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccomplishmentRoute: AccomplishmentRoute,
+  AttendanceRoute: AttendanceRoute,
   BackupRoute: BackupRoute,
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
@@ -445,6 +486,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoeRoute: CoeRoute,
   DashboardRoute: DashboardRoute,
   DataCleaningRoute: DataCleaningRoute,
+  GpsMonitorRoute: GpsMonitorRoute,
   HrBenefitsRoute: HrBenefitsRoute,
   HrEmployeesRoute: HrEmployeesRoute,
   IdCardRoute: IdCardRoute,
