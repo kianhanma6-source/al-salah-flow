@@ -27,6 +27,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandingRouteImport } from './routes/branding'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as BackupRouteImport } from './routes/backup'
+import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as AccomplishmentRouteImport } from './routes/accomplishment'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -120,6 +121,11 @@ const BackupRoute = BackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendanceRoute = AttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccomplishmentRoute = AccomplishmentRouteImport.update({
   id: '/accomplishment',
   path: '/accomplishment',
@@ -134,6 +140,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accomplishment': typeof AccomplishmentRoute
+  '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/board': typeof BoardRoute
   '/branding': typeof BrandingRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accomplishment'
+    | '/attendance'
     | '/backup'
     | '/board'
     | '/branding'
@@ -270,6 +282,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccomplishmentRoute: typeof AccomplishmentRoute
+  AttendanceRoute: typeof AttendanceRoute
   BackupRoute: typeof BackupRoute
   BoardRoute: typeof BoardRoute
   BrandingRoute: typeof BrandingRoute
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendance': {
+      id: '/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/accomplishment': {
       id: '/accomplishment'
       path: '/accomplishment'
@@ -438,6 +458,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccomplishmentRoute: AccomplishmentRoute,
+  AttendanceRoute: AttendanceRoute,
   BackupRoute: BackupRoute,
   BoardRoute: BoardRoute,
   BrandingRoute: BrandingRoute,
