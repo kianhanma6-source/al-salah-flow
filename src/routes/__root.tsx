@@ -130,6 +130,16 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    void import("../lib/cloud-backup").then((m) => m.armAutoBackup());
+    void import("../lib/attendance").then((m) => {
+      m.resumeTracking();
+      void m.flushQueue();
+    });
+  }, []);
+
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
