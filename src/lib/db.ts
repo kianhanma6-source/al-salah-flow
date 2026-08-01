@@ -261,6 +261,7 @@ export interface DB {
   hrRequests: HRRequest[];
   payroll: PayrollRun[];
   signatures: Signature[];
+  attendance: AttendanceRow[];
 }
 
 
@@ -326,6 +327,7 @@ export const defaultDB = (): DB => ({
   hrRequests: [],
   payroll: [],
   signatures: [],
+  attendance: [],
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
@@ -356,6 +358,7 @@ function hydrate(parsed: Partial<DB>): DB {
     hrRequests: parsed.hrRequests ?? [],
     payroll: parsed.payroll ?? [],
     signatures: parsed.signatures ?? [],
+    attendance: parsed.attendance ?? [],
   });
 }
 
