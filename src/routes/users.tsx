@@ -5,7 +5,18 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { DataTable, Field, Input, Panel, Select } from "@/components/ui-kit";
 import { ALL_TABS, allowedTabs, canDeleteUser, canWrite, isProgrammer, useAuth } from "@/lib/auth";
-import { PROTECTED_USERNAME, ROLES, setDB, uid, useDB, type Role, type User } from "@/lib/db";
+import {
+  DOC_KEYS,
+  PROTECTED_USERNAME,
+  ROLES,
+  setDB,
+  uid,
+  useDB,
+  type DocKey,
+  type Role,
+  type User,
+} from "@/lib/db";
+import { toLogoBase64 } from "@/lib/imaging";
 import { exportExcel, exportPDF } from "@/lib/reports";
 
 export const Route = createFileRoute("/users")({
@@ -144,6 +155,8 @@ function UsersPage() {
 
       {isNadItallo && <AssignmentPanel users={assignable} />}
 
+      {isNadItallo && <SignaturePanel />}
+
       <Panel
         title="User Displaylist"
         actions={
@@ -272,6 +285,148 @@ function AssignmentPanel({ users }: { users: User[] }) {
           </table>
         </div>
       )}
+    </Panel>
+  );
+}
+
+/* ---------------- NAD ITALLO authorized signature panel ---------------- */
+
+function SignaturePanel() {
+  const db = useDB();
+  const [label, setLabel] = useState("");
+
+  const upload = async (file: File) => {
+    const image = await toLogoBase64(file, 700);
+    setDB((d) => ({
+      ...d,
+      signatureRecords: [
+        ...d.signatureRecords,
+        { id: uid(), label: label.trim() || `Signature ${d.signatureRecords.length + 1}`, image, createdAt: new Date().toISOString() },
+      ],
+    }));
+    setLabel("");
+    toast.success("Signature saved.");
+  };
+
+  const rename = (id: string, name: string) =>
+    setDB((d) => ({
+      ...d,
+      signatureRecords: d.signatureRecords.map((s) => (s.id === id ? { ...s, label: name } : s)),
+    }));
+
+  const removeSig = (id: string) =>
+    setDB((d) => ({
+      ...d,
+      signatureRecords: d.signatureRecords.filter((s) => s.id !== id),
+      docSignatures: Object.fromEntries(
+        Object.entries(d.docSignatures).filter(([, a]) => a?.signatureId !== id),
+      ),
+    }));
+
+  const assign = (doc: DocKey, patch: Partial<{ signatureId: string; x: number; y: number; width: number }>) =>
+    setDB((d) => {
+      const cur = d.docSignatures[doc] ?? { signatureId: "", x: 140, y: 250, width: 40 };
+      const next = { ...cur, ...patch };
+      const docSignatures = { ...d.docSignatures };
+      if (!next.signatureId) delete docSignatures[doc];
+      else docSignatures[doc] = next;
+      return { ...d, docSignatures };
+    });
+
+  const nudge = (doc: DocKey, dx: number, dy: number) => {
+    const cur = db.docSignatures[doc];
+    if (!cur) return toast.error("Assign a signature first.");
+    assign(doc, { x: Math.max(0, cur.x + dx), y: Math.max(0, cur.y + dy) });
+  };
+
+  return (
+    <Panel title="Authorized Signature Panel — NAD ITALLO only">
+      <div className="grid gap-3 md:grid-cols-3">
+        <Field label="Signature label / name">
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. General Manager" />
+        </Field>
+        <Field label="Upload signature image">
+          <input
+            type="file"
+            accept="image/*"
+            className="text-[11px]"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) upload(f);
+            }}
+          />
+        </Field>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {db.signatureRecords.map((s) => (
+          <div key={s.id} className="panel-3d flex items-center gap-2 p-2">
+            <img src={s.image} alt={s.label} className="h-10 w-24 bg-white/90 object-contain p-1" />
+            <Input value={s.label} onChange={(e) => rename(s.id, e.target.value)} />
+            <button className="btn-ghost-3d px-2" onClick={() => removeSig(s.id)}>
+              <Trash2 className="size-3.5" />
+            </button>
+          </div>
+        ))}
+        {!db.signatureRecords.length && (
+          <p className="text-[11px] text-muted-foreground">No signatures uploaded yet.</p>
+        )}
+      </div>
+
+      <p className="mt-4 mb-2 text-xs font-bold uppercase tracking-wide">Document assignment & position (mm)</p>
+      <div className="space-y-2">
+        {DOC_KEYS.map(({ key, label: docLabel }) => {
+          const a = db.docSignatures[key];
+          return (
+            <div key={key} className="panel-3d grid items-end gap-2 p-2 md:grid-cols-6">
+              <Field label={docLabel}>
+                <Select value={a?.signatureId ?? ""} onChange={(e) => assign(key, { signatureId: e.target.value })}>
+                  <option value="">None</option>
+                  {db.signatureRecords.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="X">
+                <Input type="number" value={a?.x ?? 140} onChange={(e) => assign(key, { x: Number(e.target.value) })} />
+              </Field>
+              <Field label="Y">
+                <Input type="number" value={a?.y ?? 250} onChange={(e) => assign(key, { y: Number(e.target.value) })} />
+              </Field>
+              <Field label="Width">
+                <Input
+                  type="number"
+                  value={a?.width ?? 40}
+                  onChange={(e) => assign(key, { width: Number(e.target.value) })}
+                />
+              </Field>
+              <div className="flex gap-1 md:col-span-2">
+                <button className="btn-ghost-3d px-2" onClick={() => nudge(key, 0, -2)}>
+                  ↑
+                </button>
+                <button className="btn-ghost-3d px-2" onClick={() => nudge(key, 0, 2)}>
+                  ↓
+                </button>
+                <button className="btn-ghost-3d px-2" onClick={() => nudge(key, -2, 0)}>
+                  ←
+                </button>
+                <button className="btn-ghost-3d px-2" onClick={() => nudge(key, 2, 0)}>
+                  →
+                </button>
+                <button className="btn-3d" onClick={() => toast.success(`${docLabel} signature position saved.`)}>
+                  <Save className="size-3.5" /> Save
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Saved signatures print automatically on every future document until NAD ITALLO re-assigns them.
+      </p>
     </Panel>
   );
 }
