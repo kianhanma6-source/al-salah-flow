@@ -177,7 +177,7 @@ function Payroll() {
             <button
               className="btn-ghost-3d"
               onClick={() =>
-                exportPDF(`Payroll ${MONTHS[month - 1]} ${year}`, cols, reportRows)
+                exportPDF(`Payroll ${MONTHS[month - 1]} ${year}`, cols, reportRows, undefined, undefined, "payroll")
               }
             >
               <FileDown className="size-4" /> PDF

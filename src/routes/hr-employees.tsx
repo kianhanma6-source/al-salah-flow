@@ -17,6 +17,7 @@ import {
   type Employee,
 } from "@/lib/db";
 import { exportExcel, exportPDF } from "@/lib/reports";
+import { toLogoBase64 } from "@/lib/imaging";
 
 export const Route = createFileRoute("/hr-employees")({
   head: () => ({
@@ -54,6 +55,10 @@ const blank = (empId: string): Employee => ({
   email: "",
   address: "",
   dateHired: today(),
+  department: "",
+  gender: "",
+  birthday: "",
+  signatureImage: "",
   status: "ACTIVE",
 });
 
@@ -61,6 +66,7 @@ function EmployeeInformation() {
   const db = useDB();
   const { user } = useAuth();
   const writable = canWrite(user?.role);
+  const canSignature = user?.role === "PROGRAMMER-IV" || user?.role === "PROGRAMMER" || user?.role === "HR Admin";
   const [q, setQ] = useState("");
   const [form, setForm] = useState<Employee>(() => blank(nextEmpId(db.employees)));
 
@@ -185,6 +191,22 @@ function EmployeeInformation() {
           <Field label="Address">
             <Input value={form.address} onChange={(e) => set("address", e.target.value)} />
           </Field>
+          <Field label="Department">
+            <Input value={form.department ?? ""} onChange={(e) => set("department", e.target.value)} />
+          </Field>
+          <Field label="Gender">
+            <Select
+              value={form.gender ?? ""}
+              onChange={(e) => set("gender", e.target.value as Employee["gender"])}
+            >
+              <option value="">Select…</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </Select>
+          </Field>
+          <Field label="Birthday">
+            <Input type="date" value={form.birthday ?? ""} onChange={(e) => set("birthday", e.target.value)} />
+          </Field>
           <Field label="Date Hired">
             <Input type="date" value={form.dateHired} onChange={(e) => set("dateHired", e.target.value)} />
           </Field>
@@ -196,6 +218,29 @@ function EmployeeInformation() {
               <option value="ACTIVE">ACTIVE</option>
               <option value="IN-ACTIVE">IN-ACTIVE</option>
             </Select>
+          </Field>
+          <Field label="Employee Signature (HR Admin / NAD ITALLO)">
+            {canSignature ? (
+              <div className="space-y-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="text-[11px]"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!f) return;
+                    set("signatureImage", await toLogoBase64(f, 600));
+                    toast.success("Signature attached — it will auto-print on this employee's documents.");
+                  }}
+                />
+                {form.signatureImage && (
+                  <img src={form.signatureImage} alt="Employee signature" className="h-10 w-auto bg-white/90 p-1" />
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">Restricted to HR Admin and NAD ITALLO.</p>
+            )}
           </Field>
           <Field label="Linked login account (optional)">
             <Select value={form.userId ?? ""} onChange={(e) => set("userId", e.target.value || undefined)}>

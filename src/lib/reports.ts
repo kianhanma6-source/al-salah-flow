@@ -234,6 +234,7 @@ export async function exportPDF(
   rows: (string | number)[][],
   b?: Branding,
   photos?: (string | undefined)[],
+  docKey: DocKey = "all",
 ) {
   const brand = b ?? getDB().branding;
   const withPhotos = !!photos?.some(Boolean);
@@ -262,7 +263,7 @@ export async function exportPDF(
         /* ignore unsupported image */
       }
     },
-    didDrawPage: () => drawReportFooter(doc, brand),
+    didDrawPage: () => drawReportFooter(doc, brand, docKey),
   });
 
   doc.save(`${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
