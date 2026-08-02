@@ -153,7 +153,7 @@ function EmployeeInformation() {
       <Panel title="Employee Information — Data Entry">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="EMP ID">
-            <Input value={form.empId} onChange={(e) => set("empId", e.target.value)} />
+            <Input value={form.empId} onChange={(e) => set("empId", e.target.value)} readOnly={!canSignature} />
           </Field>
           <Field label="Date Encoded">
             <Input type="date" value={form.dateEncoded} onChange={(e) => set("dateEncoded", e.target.value)} />
