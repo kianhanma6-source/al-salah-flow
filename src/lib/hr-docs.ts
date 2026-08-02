@@ -1,9 +1,10 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
-import { getDB, MONTHS, type Branding, type Employee, type PayrollRow, type Signature } from "./db";
+import JsBarcode from "jsbarcode";
+import { getDB, MONTHS, signatureFor, type Branding, type Employee, type PayrollRow, type Signature } from "./db";
 import { drawReportFooter, drawReportHeader } from "./reports";
-import { toCircleBase64 } from "./imaging";
+import { toReportLogo } from "./imaging";
 
 const money = (n: number) => (Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -50,7 +51,7 @@ export async function payslipPDF(row: PayrollRow, month: number, year: number, b
     ],
   });
 
-  drawReportFooter(doc, brand);
+  drawReportFooter(doc, brand, "payslip");
   doc.save(`Payslip_${row.empId}_${MONTHS[month - 1]}_${year}.pdf`);
 }
 
@@ -88,77 +89,225 @@ export async function coePDF(
   doc.save(`COE_${emp.empId}_${emp.fullName.replace(/\s+/g, "_")}.pdf`);
 }
 
-/** Employee ID card — front (photo/name/position/EMP ID) + back (info + QR). */
+/** Code128 barcode as PNG base64. */
+export function barcodeDataUrl(value: string) {
+  const canvas = document.createElement("canvas");
+  JsBarcode(canvas, value || "N/A", {
+    format: "CODE128",
+    displayValue: false,
+    margin: 0,
+    width: 2,
+    height: 60,
+  });
+  return canvas.toDataURL("image/png");
+}
+
+const NAVY: [number, number, number] = [16, 35, 66];
+const GOLD: [number, number, number] = [198, 158, 74];
+
+/** Employee ID card — official layout (portrait 54 x 86 mm), front + back. */
 export async function idCardPDF(emp: Employee, b?: Branding) {
-  const brand = b ?? getDB().branding;
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: [86, 54] });
+  const db = getDB();
+  const brand = b ?? db.branding;
+  const W = 54;
+  const H = 86;
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [W, H] });
 
   let logo = "";
   if (brand.logo) {
     try {
-      logo = await toCircleBase64(brand.logo, 256);
+      logo = await toReportLogo(brand.logo, 512);
     } catch {
       logo = "";
     }
   }
 
-  /* FRONT */
-  doc.setFillColor(17, 46, 82);
-  doc.rect(0, 0, 86, 13, "F");
-  if (logo) doc.addImage(logo, "PNG", 2, 1.5, 10, 10);
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
-  doc.text(doc.splitTextToSize(brand.companyName, 68) as string[], 14, 5.5);
+  const drawFrame = () => {
+    doc.setFillColor(252, 252, 250);
+    doc.rect(0, 0, W, H, "F");
+    /* top-right navy corner with gold edge */
+    doc.setFillColor(...GOLD);
+    doc.triangle(W - 26, 0, W, 0, W, 26, "F");
+    doc.setFillColor(...NAVY);
+    doc.triangle(W - 23, 0, W, 0, W, 23, "F");
+    /* bottom-left navy corner with gold edge */
+    doc.setFillColor(...GOLD);
+    doc.triangle(0, H - 22, 22, H, 0, H, "F");
+    doc.setFillColor(...NAVY);
+    doc.triangle(0, H - 19, 19, H, 0, H, "F");
+  };
 
-  doc.setTextColor(20, 20, 20);
+  const drawBrandRow = () => {
+    if (logo) {
+      try {
+        const p = doc.getImageProperties(logo);
+        const h = 11;
+        const w = Math.min(16, (p.width / p.height) * h);
+        doc.addImage(logo, "PNG", 4, 4, w, h);
+      } catch {
+        /* ignore */
+      }
+    }
+    doc.setTextColor(...NAVY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(5.6);
+    doc.text(doc.splitTextToSize(brand.companyName, 30) as string[], 22, 8);
+  };
+
+  /* ---------- FRONT ---------- */
+  drawFrame();
+  drawBrandRow();
+
+  /* photo with gold frame */
+  const px = 15.5;
+  const py = 19;
+  const pw = 23;
+  const ph = 28;
+  doc.setFillColor(...GOLD);
+  doc.rect(px - 1, py - 1, pw + 2, ph + 2, "F");
+  doc.setFillColor(255, 255, 255);
+  doc.rect(px, py, pw, ph, "F");
   if (emp.photo) {
     try {
-      doc.addImage(emp.photo, "JPEG", 4, 17, 24, 24);
+      doc.addImage(emp.photo, "JPEG", px, py, pw, ph);
     } catch {
       /* ignore */
     }
   }
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(doc.splitTextToSize(emp.fullName, 50) as string[], 32, 22);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.text(emp.position || "", 32, 30);
-  doc.text(`EMP ID: ${emp.empId}`, 32, 35);
-  doc.setFontSize(5.5);
-  doc.text("NAD ITALLO-PROGRAMMER v10.0", 84, 51, { align: "right" });
 
-  /* BACK */
-  doc.addPage([86, 54], "landscape");
-  doc.setFillColor(17, 46, 82);
-  doc.rect(0, 0, 86, 8, "F");
+  /* detail lines */
+  const fields: [string, string][] = [
+    ["Full Name:", emp.fullName],
+    ["Position:", emp.position],
+    ["Employee ID:", emp.empId],
+    ["Department:", emp.department || "—"],
+  ];
+  let fy = 55;
+  fields.forEach(([label, value]) => {
+    doc.setTextColor(...NAVY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(5.6);
+    doc.text(label, 5, fy);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5.4);
+    doc.text(doc.splitTextToSize(String(value || ""), 26) as string[], 21, fy);
+    doc.setDrawColor(120, 120, 120);
+    doc.setLineWidth(0.2);
+    doc.line(20, fy + 1, 49, fy + 1);
+    fy += 6;
+  });
+
+  /* management signature + SIGNATURE label */
+  const sig = signatureFor(db, "idcard");
+  if (sig) {
+    try {
+      const p = doc.getImageProperties(sig.record.image);
+      const w = sig.width || 18;
+      const h = (p.height / p.width) * w;
+      doc.addImage(sig.record.image, "PNG", sig.x || 28, (sig.y || 71) - h, w, h);
+    } catch {
+      /* ignore */
+    }
+  }
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.line(27, 72, 50, 72);
+  doc.setTextColor(...NAVY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(4.6);
+  doc.text("SIGNATURE", 38.5, 75, { align: "center" });
+
+  /* barcode: Emirates ID number + expiry, image only */
+  try {
+    const bc = barcodeDataUrl(`${emp.emiratesId || "N/A"} ${emp.emiratesIdExpiry || ""}`.trim());
+    doc.addImage(bc, "PNG", 24, 77, 26, 7);
+  } catch {
+    /* ignore */
+  }
+
+  /* ---------- BACK ---------- */
+  doc.addPage([W, H], "portrait");
+  drawFrame();
+  drawBrandRow();
+
+  doc.setTextColor(...NAVY);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.text("EMPLOYEE DETAILS", W / 2, 22, { align: "center" });
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.line(12, 23.5, W - 12, 23.5);
+
+  doc.setFontSize(5);
+  const details: [string, string][] = [
+    ["Joining Date", emp.dateHired || "—"],
+    ["Gender", emp.gender || "—"],
+    ["Birthday", emp.birthday || "—"],
+    ["Validity", emp.emiratesIdExpiry || "—"],
+  ];
+  let dy = 28;
+  details.forEach(([k, v]) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(`${k}:`, 6, dy);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(v), 24, dy);
+    dy += 4.5;
+  });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.4);
+  doc.text("TERMS AND CONDITIONS", W / 2, dy + 3, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(4.4);
+  const terms =
+    `By using this identification card, the holder agrees to abide by the company's policies and regulations. This card remains the property of ${brand.companyName} and must be surrendered upon request or upon termination of employment.\n\nIf found, please return this card immediately to the company address listed below. Unauthorized use, alteration, or duplication of this card is strictly prohibited and may result in legal action.`;
+  doc.text(doc.splitTextToSize(terms, W - 12) as string[], 6, dy + 7, {
+    align: "justify",
+    maxWidth: W - 12,
+    lineHeightFactor: 1.35,
+  });
+
+  /* contact footer */
+  doc.setFillColor(...NAVY);
+  doc.rect(0, H - 24, W, 24, "F");
+  doc.setFillColor(...GOLD);
+  doc.rect(0, H - 24.7, W, 0.7, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(4.4);
+  doc.setFont("helvetica", "bold");
+  doc.text("CONTACT US", 4, H - 20);
+  doc.setFont("helvetica", "normal");
+  doc.text(brand.contact.replace(/^Contact:\s*/i, ""), 4, H - 17);
+  doc.setFont("helvetica", "bold");
+  doc.text("EMAIL", 4, H - 13.5);
+  doc.setFont("helvetica", "normal");
+  doc.text(brand.email.replace(/^Email:\s*/i, ""), 4, H - 10.5);
+  doc.setFont("helvetica", "bold");
+  doc.text("ADDRESS", 4, H - 7);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    doc.splitTextToSize(`${brand.addressLine1} ${brand.addressLine2}`, 34) as string[],
+    4,
+    H - 4,
+  );
+
+  /* MANAGEMENT signature block */
+  if (sig) {
+    try {
+      const p = doc.getImageProperties(sig.record.image);
+      const w = 16;
+      const h = (p.height / p.width) * w;
+      doc.addImage(sig.record.image, "PNG", 36, H - 14 - h, w, h);
+    } catch {
+      /* ignore */
+    }
+  }
+  doc.setDrawColor(...GOLD);
+  doc.line(36, H - 12, 52, H - 12);
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
-  doc.text("EMPLOYEE INFORMATION", 4, 5.2);
-  doc.setTextColor(20, 20, 20);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6);
-  const info = [
-    `Emirates ID: ${emp.emiratesId || "—"}`,
-    `EID Expiry: ${emp.emiratesIdExpiry || "—"}`,
-    `Passport: ${emp.passport || "—"}`,
-    `Mobile: ${emp.mobile || "—"}`,
-    `Email: ${emp.email || "—"}`,
-    `Date Hired: ${emp.dateHired || "—"}`,
-    `Status: ${emp.status}`,
-  ];
-  info.forEach((t, i) => doc.text(t, 4, 13 + i * 4.5));
-
-  const qr = await QRCode.toDataURL(
-    `EID:${emp.emiratesId || "N/A"}|EXP:${emp.emiratesIdExpiry || "N/A"}|EMP:${emp.empId}|NAME:${emp.fullName}`,
-    { margin: 0, width: 256 },
-  );
-  doc.addImage(qr, "PNG", 60, 14, 22, 22);
-  doc.setFontSize(5);
-  doc.text("EID No. + Expiry", 71, 39, { align: "center" });
-  doc.text(brand.contact, 4, 50);
+  doc.setFontSize(4.6);
+  doc.text("MANAGEMENT", 44, H - 9, { align: "center" });
 
   doc.save(`ID_${emp.empId}_${emp.fullName.replace(/\s+/g, "_")}.pdf`);
 }
