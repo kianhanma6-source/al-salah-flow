@@ -35,7 +35,20 @@ export async function toSquareBase64(file: File, px = 600, maxBytes = 80 * 1024)
   return out;
 }
 
-/** Logos keep transparency + aspect ratio. */
+/** Remove a near-white/solid background from a logo, making it transparent. */
+function knockOutBackground(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d")!;
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    if (r > 235 && g > 235 && b > 235) d[i + 3] = 0;
+    else if (r > 215 && g > 215 && b > 215) d[i + 3] = Math.min(d[i + 3], 90);
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/** Logos keep aspect ratio and get an automatic transparent background. */
 export async function toLogoBase64(file: File, max = 512): Promise<string> {
   const dataUrl = await new Promise<string>((res, rej) => {
     const fr = new FileReader();
@@ -54,11 +67,11 @@ export async function toLogoBase64(file: File, max = 512): Promise<string> {
   canvas.width = Math.round(img.width * scale);
   canvas.height = Math.round(img.height * scale);
   canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  knockOutBackground(canvas);
   return canvas.toDataURL("image/png");
 }
 
-/** Fit any image (base64/url) fully inside a circle with a soft 3D ring — returns PNG base64.
- *  The whole logo is contained (never cropped) and no square edges/background remain. */
+/** Report logo: plain rectangular, transparent background, never cropped or circled. */
 export async function toCircleBase64(src: string, px = 512): Promise<string> {
   const img = await new Promise<HTMLImageElement>((res, rej) => {
     const i = new Image();
@@ -67,35 +80,13 @@ export async function toCircleBase64(src: string, px = 512): Promise<string> {
     i.onerror = rej;
     i.src = src;
   });
+  const scale = Math.min(px / img.width, px / img.height);
   const canvas = document.createElement("canvas");
-  canvas.width = px;
-  canvas.height = px;
-  const ctx = canvas.getContext("2d")!;
-  const r = px / 2 - 6;
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(px / 2, px / 2, r, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.clip();
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, px, px);
-  // contain-fit so the entire logo is visible inside the circle
-  const box = r * 1.42; // inscribed square inside the circle
-  const scale = Math.min(box / img.width, box / img.height);
-  const w = img.width * scale;
-  const h = img.height * scale;
-  ctx.drawImage(img, (px - w) / 2, (px - h) / 2, w, h);
-  ctx.restore();
-  ctx.lineWidth = 8;
-  ctx.strokeStyle = "rgba(20,60,110,0.85)";
-  ctx.beginPath();
-  ctx.arc(px / 2, px / 2, r, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "rgba(255,255,255,0.7)";
-  ctx.beginPath();
-  ctx.arc(px / 2, px / 2, r - 7, Math.PI * 0.9, Math.PI * 1.9);
-  ctx.stroke();
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  knockOutBackground(canvas);
   return canvas.toDataURL("image/png");
-
 }
+
+export const toReportLogo = toCircleBase64;
