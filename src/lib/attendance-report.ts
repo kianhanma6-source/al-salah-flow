@@ -66,6 +66,6 @@ export async function attendancePDF(rows: AttendanceRow[]) {
       });
     });
 
-  drawReportFooter(doc);
+  drawReportFooter(doc, undefined, "attendance");
   doc.save(`attendance_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

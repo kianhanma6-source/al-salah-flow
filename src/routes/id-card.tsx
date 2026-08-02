@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { DataTable, Field, Input, Panel, SearchBar, Select } from "@/components/ui-kit";
 import { useDB } from "@/lib/db";
-import { idCardPDF, qrDataUrl } from "@/lib/hr-docs";
+import { barcodeDataUrl, idCardPDF } from "@/lib/hr-docs";
+import defaultLogo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/id-card")({
   head: () => ({
@@ -34,14 +35,16 @@ function IdCard() {
   const [q, setQ] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const emp = db.employees.find((e) => e.id === employeeId);
-  const [qr, setQr] = useState("");
+  const [barcode, setBarcode] = useState("");
 
   useEffect(() => {
-    if (!emp) return setQr("");
-    qrDataUrl(
-      `EID:${emp.emiratesId || "N/A"}|EXP:${emp.emiratesIdExpiry || "N/A"}|EMP:${emp.empId}|NAME:${emp.fullName}`,
-    ).then(setQr);
-  }, [emp?.emiratesId, emp?.emiratesIdExpiry, emp?.empId, emp?.fullName, emp]);
+    if (!emp) return setBarcode("");
+    try {
+      setBarcode(barcodeDataUrl(`${emp.emiratesId || "N/A"} ${emp.emiratesIdExpiry || ""}`.trim()));
+    } catch {
+      setBarcode("");
+    }
+  }, [emp?.emiratesId, emp?.emiratesIdExpiry, emp]);
 
   const filtered = db.employees.filter((e) =>
     `${e.empId} ${e.fullName} ${e.position}`.toLowerCase().includes(q.trim().toLowerCase()),
@@ -81,9 +84,7 @@ function IdCard() {
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <div className="panel-3d overflow-hidden p-0">
               <div className="flex items-center gap-2 bg-primary px-3 py-2">
-                {db.branding.logo && (
-                  <img src={db.branding.logo} alt="" className="size-8 rounded-full bg-white object-contain p-0.5" />
-                )}
+                <img src={db.branding.logo || defaultLogo} alt="" className="h-8 w-auto object-contain" />
                 <span className="text-[10px] font-bold uppercase text-primary-foreground">
                   {db.branding.companyName}
                 </span>
@@ -98,6 +99,7 @@ function IdCard() {
                   <p className="display text-lg font-bold">{emp.fullName}</p>
                   <p className="text-sm text-muted-foreground">{emp.position}</p>
                   <p className="mt-2 text-xs">EMP ID: {emp.empId}</p>
+                  <p className="text-xs text-muted-foreground">Department: {emp.department || "—"}</p>
                 </div>
               </div>
             </div>
@@ -111,13 +113,18 @@ function IdCard() {
                   <p>Passport: {emp.passport || "—"}</p>
                   <p>Mobile: {emp.mobile || "—"}</p>
                   <p>Email: {emp.email || "—"}</p>
-                  <p>Date Hired: {emp.dateHired || "—"}</p>
+                  <p>Joining Date: {emp.dateHired || "—"}</p>
+                  <p>Gender: {emp.gender || "—"}</p>
+                  <p>Birthday: {emp.birthday || "—"}</p>
+                  <p>Validity: {emp.emiratesIdExpiry || "—"}</p>
                   <p>Status: {emp.status}</p>
                 </div>
-                {qr && <img src={qr} alt="Employee QR code" className="size-24 self-start rounded bg-white p-1" />}
+                {barcode && (
+                  <img src={barcode} alt="Employee barcode" className="h-16 w-28 self-start bg-white p-1" />
+                )}
               </div>
               <p className="mt-2 text-[10px] text-muted-foreground">
-                QR updates automatically whenever the Emirates ID number or expiry is edited.
+                Barcode carries the Emirates ID number and expiry, and updates automatically when they are edited.
               </p>
             </div>
           </div>

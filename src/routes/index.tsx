@@ -70,13 +70,13 @@ function LoginPage() {
 
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="relative">
-              <div className="absolute -inset-3 rounded-full bg-primary/25 blur-2xl pulse-glow" />
+              <div className="absolute -inset-3 rounded-2xl bg-primary/25 blur-2xl pulse-glow" />
               <img
                 src={db.branding.logo || defaultLogo}
                 alt="AL HAYAH AL SALAH logo"
                 width={112}
                 height={112}
-                className="relative size-28 rounded-full border-2 border-primary/60 bg-white/90 object-contain p-2 shadow-[0_18px_34px_rgba(0,0,0,0.75),inset_0_3px_10px_rgba(255,255,255,0.8)] transition-transform duration-500 hover:[transform:rotateX(12deg)_rotateY(-12deg)_scale(1.05)]"
+                className="relative h-24 w-auto max-w-[13rem] object-contain drop-shadow-[0_14px_26px_rgba(0,0,0,0.75)] transition-transform duration-500 hover:[transform:rotateX(12deg)_rotateY(-12deg)_scale(1.05)]"
               />
             </div>
             <button

@@ -1,8 +1,9 @@
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getDB, replaceDB, type Branding, type DB } from "./db";
-import { toCircleBase64 } from "./imaging";
+import { getDB, replaceDB, signatureFor, type Branding, type DB, type DocKey } from "./db";
+import { toReportLogo } from "./imaging";
+import defaultLogo from "@/assets/logo.png";
 
 export type Row = Record<string, unknown>;
 
@@ -149,9 +150,10 @@ export async function drawReportHeader(
   const top = 12;
 
   let round = "";
-  if (brand.logo) {
+  const logoSrc = brand.logo || defaultLogo;
+  if (logoSrc) {
     try {
-      round = await toCircleBase64(brand.logo, 512);
+      round = await toReportLogo(logoSrc, 512);
     } catch {
       round = "";
     }
@@ -159,14 +161,17 @@ export async function drawReportHeader(
 
   const size = 20;
   const left = 14;
+  let logoW = size;
   if (round) {
     try {
-      doc.addImage(round, "PNG", left, top, size, size);
+      const props = doc.getImageProperties(round);
+      logoW = Math.min(34, (props.width / props.height) * size);
+      doc.addImage(round, "PNG", left, top, logoW, size);
     } catch {
       /* ignore */
     }
   }
-  const textX = round ? left + size + 6 : left;
+  const textX = round ? left + logoW + 6 : left;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.text(brand.companyName, textX, top + (round ? size / 2 + 1.5 : 5));
@@ -193,10 +198,29 @@ export async function drawReportHeader(
   return y + 8;
 }
 
-/** Standard footer: signatories + programmer version tag. */
-export function drawReportFooter(doc: jsPDF, brand: Branding = getDB().branding) {
+/** Standard footer: assigned signature image (if any) + signatories + programmer version tag. */
+export function drawReportFooter(
+  doc: jsPDF,
+  brand: Branding = getDB().branding,
+  docKey: DocKey = "all",
+) {
   const w = doc.internal.pageSize.getWidth();
   const h = doc.internal.pageSize.getHeight();
+
+  const sig = signatureFor(getDB(), docKey);
+  if (sig) {
+    try {
+      const props = doc.getImageProperties(sig.record.image);
+      const width = sig.width || 40;
+      const height = (props.height / props.width) * width;
+      doc.addImage(sig.record.image, "PNG", sig.x, sig.y, width, height);
+      doc.setFontSize(7);
+      doc.text(sig.record.label, sig.x, sig.y + height + 4);
+    } catch {
+      /* ignore unsupported signature image */
+    }
+  }
+
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.text(brand.signatory1, 14, h - 14);
@@ -212,6 +236,7 @@ export async function exportPDF(
   rows: (string | number)[][],
   b?: Branding,
   photos?: (string | undefined)[],
+  docKey: DocKey = "all",
 ) {
   const brand = b ?? getDB().branding;
   const withPhotos = !!photos?.some(Boolean);
@@ -240,7 +265,7 @@ export async function exportPDF(
         /* ignore unsupported image */
       }
     },
-    didDrawPage: () => drawReportFooter(doc, brand),
+    didDrawPage: () => drawReportFooter(doc, brand, docKey),
   });
 
   doc.save(`${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);

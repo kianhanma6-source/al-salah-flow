@@ -34,13 +34,13 @@ export function ReportHeader() {
     <div className="panel-3d px-4 py-4">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
-          <div className="absolute -inset-1.5 rounded-full bg-primary/25 blur-lg" />
+          <div className="absolute -inset-1.5 rounded-xl bg-primary/25 blur-lg" />
           <img
             src={branding.logo || defaultLogo}
             alt="Company logo"
             width={64}
             height={64}
-            className="relative size-16 rounded-full border-2 border-primary/60 bg-white object-contain p-1 shadow-[0_8px_18px_rgba(0,0,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)]"
+            className="relative h-14 w-auto max-w-24 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
           />
         </div>
         <div className="min-w-0">

@@ -146,6 +146,11 @@ export interface Employee {
   email: string;
   address: string;
   dateHired: string;
+  department?: string;
+  gender?: "Male" | "Female" | "";
+  birthday?: string;
+  /** employee personal signature (base64) — HR Admin / NAD ITALLO upload only */
+  signatureImage?: string;
   status: "ACTIVE" | "IN-ACTIVE";
   /** links this employee record to a login account (optional) */
   userId?: string;
@@ -214,6 +219,41 @@ export interface Signature {
   position: string;
 }
 
+/* ---------------- Authorized signature system ---------------- */
+
+export type DocKey =
+  | "idcard"
+  | "coe"
+  | "payslip"
+  | "payroll"
+  | "attendance"
+  | "all";
+
+export const DOC_KEYS: { key: DocKey; label: string }[] = [
+  { key: "idcard", label: "ID Card" },
+  { key: "coe", label: "COE" },
+  { key: "payslip", label: "Payslip" },
+  { key: "payroll", label: "Payroll Report" },
+  { key: "attendance", label: "Attendance Report" },
+  { key: "all", label: "All Reports" },
+];
+
+/** An uploaded, named signature image. */
+export interface SignatureRecord {
+  id: string;
+  label: string;
+  image: string; // base64 png
+  createdAt: string;
+}
+
+/** Saved placement of a signature on one document type (mm from left/bottom-relative top). */
+export interface SignatureAssignment {
+  signatureId: string;
+  x: number;
+  y: number;
+  width: number;
+}
+
 /* ---------------- Attendance + GPS (Day 3) ---------------- */
 
 export interface GpsPoint {
@@ -262,6 +302,8 @@ export interface DB {
   payroll: PayrollRun[];
   signatures: Signature[];
   attendance: AttendanceRow[];
+  signatureRecords: SignatureRecord[];
+  docSignatures: Partial<Record<DocKey, SignatureAssignment>>;
 }
 
 
@@ -328,6 +370,8 @@ export const defaultDB = (): DB => ({
   payroll: [],
   signatures: [],
   attendance: [],
+  signatureRecords: [],
+  docSignatures: {},
 });
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
@@ -359,6 +403,8 @@ function hydrate(parsed: Partial<DB>): DB {
     payroll: parsed.payroll ?? [],
     signatures: parsed.signatures ?? [],
     attendance: parsed.attendance ?? [],
+    signatureRecords: parsed.signatureRecords ?? [],
+    docSignatures: parsed.docSignatures ?? {},
   });
 }
 
@@ -516,14 +562,26 @@ export function availableQty(mod: ModuleData, materialName: string, model: strin
 
 /* ---------------- HR helpers (Day 1) ---------------- */
 
-/** EMP ID format: AL_<year>_EID_<running no.> */
-export function nextEmpId(existing: Employee[]) {
-  const year = new Date().getFullYear();
+/** EMP ID format: AL + date hired (DDMMYY) + auto-increment serial → AL310226-0001 */
+export function nextEmpId(existing: Employee[], dateHired?: string) {
+  const d = dateHired ? new Date(dateHired) : new Date();
+  const base = Number.isNaN(d.getTime()) ? new Date() : d;
+  const dd = String(base.getDate()).padStart(2, "0");
+  const mm = String(base.getMonth() + 1).padStart(2, "0");
+  const yy = String(base.getFullYear()).slice(2);
   const nums = existing
     .map((e) => Number(String(e.empId).split("-").pop()?.replace(/\D/g, "")))
     .filter((n) => !Number.isNaN(n));
   const next = (nums.length ? Math.max(...nums) : 0) + 1;
-  return `AL-${year}-EID-${String(next).padStart(4, "0")}`;
+  return `AL${dd}${mm}${yy}-${String(next).padStart(4, "0")}`;
+}
+
+/** Resolve the signature saved for a document (falls back to the "all reports" one). */
+export function signatureFor(db: DB, doc: DocKey) {
+  const a = db.docSignatures?.[doc] ?? db.docSignatures?.all;
+  if (!a) return null;
+  const rec = db.signatureRecords.find((s) => s.id === a.signatureId);
+  return rec ? { ...a, record: rec } : null;
 }
 
 export function yearsOfService(dateHired: string) {

@@ -1,6 +1,6 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { AppShell, ReportHeader } from "@/components/AppShell";
+import { AppShell } from "@/components/AppShell";
 import { DataTable, Panel, SearchBar } from "@/components/ui-kit";
 import { useDB } from "@/lib/db";
 import { flushQueue, fmtTime, resumeTracking } from "@/lib/attendance";
@@ -58,7 +58,6 @@ function GpsMonitor() {
 
   return (
     <div className="space-y-5">
-      <ReportHeader />
 
       <Panel title="Live Map — Active Employees">
         <Suspense fallback={<div className="h-[420px] rounded-lg border border-border" />}>
