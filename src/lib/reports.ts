@@ -2,7 +2,8 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getDB, replaceDB, signatureFor, type Branding, type DB, type DocKey } from "./db";
-import { toCircleBase64 } from "./imaging";
+import { toReportLogo } from "./imaging";
+import defaultLogo from "@/assets/logo.png";
 
 export type Row = Record<string, unknown>;
 
@@ -149,9 +150,10 @@ export async function drawReportHeader(
   const top = 12;
 
   let round = "";
-  if (brand.logo) {
+  const logoSrc = brand.logo || defaultLogo;
+  if (logoSrc) {
     try {
-      round = await toCircleBase64(brand.logo, 512);
+      round = await toReportLogo(logoSrc, 512);
     } catch {
       round = "";
     }

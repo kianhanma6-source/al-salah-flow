@@ -5,6 +5,7 @@ import JsBarcode from "jsbarcode";
 import { getDB, MONTHS, signatureFor, type Branding, type Employee, type PayrollRow, type Signature } from "./db";
 import { drawReportFooter, drawReportHeader } from "./reports";
 import { toReportLogo } from "./imaging";
+import defaultLogo from "@/assets/logo.png";
 
 const money = (n: number) => (Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -138,9 +139,10 @@ export async function idCardPDF(emp: Employee, b?: Branding) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [W, H] });
 
   let logo = "";
-  if (brand.logo) {
+  const logoSrc = brand.logo || defaultLogo;
+  if (logoSrc) {
     try {
-      logo = await toReportLogo(brand.logo, 512);
+      logo = await toReportLogo(logoSrc, 512);
     } catch {
       logo = "";
     }
