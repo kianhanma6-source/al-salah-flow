@@ -159,14 +159,17 @@ export async function drawReportHeader(
 
   const size = 20;
   const left = 14;
+  let logoW = size;
   if (round) {
     try {
-      doc.addImage(round, "PNG", left, top, size, size);
+      const props = doc.getImageProperties(round);
+      logoW = Math.min(34, (props.width / props.height) * size);
+      doc.addImage(round, "PNG", left, top, logoW, size);
     } catch {
       /* ignore */
     }
   }
-  const textX = round ? left + size + 6 : left;
+  const textX = round ? left + logoW + 6 : left;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.text(brand.companyName, textX, top + (round ? size / 2 + 1.5 : 5));
@@ -193,10 +196,29 @@ export async function drawReportHeader(
   return y + 8;
 }
 
-/** Standard footer: signatories + programmer version tag. */
-export function drawReportFooter(doc: jsPDF, brand: Branding = getDB().branding) {
+/** Standard footer: assigned signature image (if any) + signatories + programmer version tag. */
+export function drawReportFooter(
+  doc: jsPDF,
+  brand: Branding = getDB().branding,
+  docKey: DocKey = "all",
+) {
   const w = doc.internal.pageSize.getWidth();
   const h = doc.internal.pageSize.getHeight();
+
+  const sig = signatureFor(getDB(), docKey);
+  if (sig) {
+    try {
+      const props = doc.getImageProperties(sig.record.image);
+      const width = sig.width || 40;
+      const height = (props.height / props.width) * width;
+      doc.addImage(sig.record.image, "PNG", sig.x, sig.y, width, height);
+      doc.setFontSize(7);
+      doc.text(sig.record.label, sig.x, sig.y + height + 4);
+    } catch {
+      /* ignore unsupported signature image */
+    }
+  }
+
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.text(brand.signatory1, 14, h - 14);
