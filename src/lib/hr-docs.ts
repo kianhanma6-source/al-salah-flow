@@ -51,6 +51,19 @@ export async function payslipPDF(row: PayrollRow, month: number, year: number, b
     ],
   });
 
+  const empSig = getDB().employees.find((e) => e.empId === row.empId)?.signatureImage;
+  if (empSig) {
+    try {
+      const after = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+      const p = doc.getImageProperties(empSig);
+      const w = 34;
+      doc.addImage(empSig, "PNG", 14, after + 10, w, (p.height / p.width) * w);
+      doc.setFontSize(8);
+      doc.text("Employee Signature", 14, after + 10 + (p.height / p.width) * w + 4);
+    } catch {
+      /* ignore */
+    }
+  }
   drawReportFooter(doc, brand, "payslip");
   doc.save(`Payslip_${row.empId}_${MONTHS[month - 1]}_${year}.pdf`);
 }
@@ -85,7 +98,18 @@ export async function coePDF(
     doc.text(s.position || "", x, sy + 10);
   });
 
-  drawReportFooter(doc, brand);
+  if (emp.signatureImage) {
+    try {
+      const p = doc.getImageProperties(emp.signatureImage);
+      const wImg = 34;
+      doc.addImage(emp.signatureImage, "PNG", 14, sy + 18, wImg, (p.height / p.width) * wImg);
+      doc.setFontSize(8);
+      doc.text("Employee Signature", 14, sy + 22 + (p.height / p.width) * wImg);
+    } catch {
+      /* ignore */
+    }
+  }
+  drawReportFooter(doc, brand, "coe");
   doc.save(`COE_${emp.empId}_${emp.fullName.replace(/\s+/g, "_")}.pdf`);
 }
 
