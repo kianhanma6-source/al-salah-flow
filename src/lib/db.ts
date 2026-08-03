@@ -458,7 +458,9 @@ function hydrate(parsed: Partial<DB>): DB {
     attendance: parsed.attendance ?? [],
     signatureRecords: parsed.signatureRecords ?? [],
     docSignatures: parsed.docSignatures ?? {},
+    registrations: parsed.registrations ?? [],
   });
+
 }
 
 function load(): DB {
