@@ -197,6 +197,14 @@ export interface HRLine {
   date: string;
 }
 
+export interface ChatAttachment {
+  kind: "image" | "file";
+  name: string;
+  /** base64 data url */
+  data: string;
+  size: number;
+}
+
 export interface ChatMessage {
   id: string;
   userId: string;
@@ -204,7 +212,11 @@ export interface ChatMessage {
   role: string;
   text: string;
   at: string;
+  attachment?: ChatAttachment;
+  /** sticker / gif url or emoji shortcode */
+  sticker?: string;
 }
+
 
 export interface HRRequest {
   id: string;
