@@ -348,7 +348,9 @@ export interface DB {
   attendance: AttendanceRow[];
   signatureRecords: SignatureRecord[];
   docSignatures: Partial<Record<DocKey, SignatureAssignment>>;
+  registrations: Registration[];
 }
+
 
 
 const KEY = "ahas_system_v10";
