@@ -98,6 +98,7 @@ export type TabKey =
   | "attendance"
   | "gps"
   | "chat"
+  | "reports"
   | "backup"
   | "cleaning"
   | "branding";
@@ -119,11 +120,13 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "gps", label: "GPS Monitoring" },
   { key: "myhr", label: "My HR Dashboard" },
   { key: "chat", label: "Group Chat" },
+  { key: "reports", label: "Reports" },
   { key: "users", label: "User Management" },
   { key: "backup", label: "Backup & Data" },
   { key: "cleaning", label: "Data Cleaning" },
   { key: "branding", label: "Re-Branding" },
 ];
+
 
 const EVERY: TabKey[] = ALL_TABS.map((t) => t.key);
 const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
@@ -147,7 +150,7 @@ const ACCESS: Record<string, TabKey[]> = {
   Technician: PERSONAL,
   "Collection Team": PERSONAL,
   Client: ["dashboard"],
-  Viewer: ["dashboard", "myhr", "chat"],
+  Viewer: ["reports", "chat"],
   /* legacy */
   ADMIN: without("branding", "cleaning", ...NO_HR),
   USER: without("branding", "cleaning", "users", ...NO_HR),
@@ -170,6 +173,15 @@ export const allowedTabs = (u: Pick<User, "role" | "perms"> | null | undefined):
 
 export const canAccess = (u: Pick<User, "role" | "perms"> | null | undefined, tab: TabKey) =>
   allowedTabs(u).includes(tab);
+
+/** Landing page after login — Viewers go straight to their Reports page. */
+export const homeRoute = (u: Pick<User, "role" | "perms"> | null | undefined) => {
+  const tabs = allowedTabs(u);
+  if (tabs.includes("dashboard")) return "/dashboard";
+  if (tabs.includes("reports")) return "/reports";
+  return "/dashboard";
+};
+
 
 /** View-only roles. */
 const READ_ONLY: string[] = ["Viewer", "Client", "VISITOR"];

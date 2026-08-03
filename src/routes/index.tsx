@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, LogIn, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth, isProgrammerIV } from "@/lib/auth";
+import { useAuth, isProgrammerIV, homeRoute } from "@/lib/auth";
 import { PROGRAMMER_TAG, getDB, setDB, useDB } from "@/lib/db";
 import { toLogoBase64 } from "@/lib/imaging";
 import defaultLogo from "@/assets/logo.png";
@@ -42,7 +42,7 @@ function LoginPage() {
   }, [remembered]);
 
   useEffect(() => {
-    if (ready && user) navigate({ to: "/dashboard", replace: true });
+    if (ready && user) navigate({ to: homeRoute(user), replace: true });
   }, [ready, user, navigate]);
 
   const submit = (e: React.FormEvent) => {
@@ -50,7 +50,6 @@ function LoginPage() {
     const err = login(username, password, remember);
     if (err) return toast.error(err);
     toast.success("Welcome back!");
-    navigate({ to: "/dashboard", replace: true });
   };
 
   const canEditLogo = isProgrammerIV(getDB().users.find((u) => u.username === username)?.role);
@@ -76,7 +75,7 @@ function LoginPage() {
                 alt="AL HAYAH AL SALAH logo"
                 width={112}
                 height={112}
-                className="relative h-24 w-auto max-w-[13rem] object-contain drop-shadow-[0_14px_26px_rgba(0,0,0,0.75)] transition-transform duration-500 hover:[transform:rotateX(12deg)_rotateY(-12deg)_scale(1.05)]"
+                className="relative size-24 rounded-full border border-primary/40 bg-white/5 object-contain p-1 drop-shadow-[0_14px_26px_rgba(0,0,0,0.75)] transition-transform duration-500 hover:[transform:rotateX(12deg)_rotateY(-12deg)_scale(1.05)]"
               />
             </div>
             <button

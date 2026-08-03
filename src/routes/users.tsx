@@ -8,6 +8,7 @@ import { ALL_TABS, allowedTabs, canDeleteUser, canWrite, isProgrammer, useAuth }
 import {
   DOC_KEYS,
   PROTECTED_USERNAME,
+  REPORT_KEYS,
   ROLES,
   setDB,
   uid,
@@ -153,9 +154,14 @@ function UsersPage() {
         </Panel>
       )}
 
+      {(isNadItallo || me?.role === "HR Admin") && <RegistrationPanel />}
+
       {isNadItallo && <AssignmentPanel users={assignable} />}
 
+      {isNadItallo && <ReportsAssignmentPanel users={assignable} />}
+
       {isNadItallo && <SignaturePanel />}
+
 
       <Panel
         title="User Displaylist"
@@ -427,6 +433,149 @@ function SignaturePanel() {
       <p className="mt-2 text-[11px] text-muted-foreground">
         Saved signatures print automatically on every future document until NAD ITALLO re-assigns them.
       </p>
+    </Panel>
+  );
+}
+
+/* ---------------- Reports assignment (Viewer accounts) ---------------- */
+
+function ReportsAssignmentPanel({ users }: { users: User[] }) {
+  const viewers = users.filter((u) => ["Viewer", "VISITOR", "Client"].includes(u.role));
+
+  const toggle = (u: User, key: string) =>
+    setDB((d) => ({
+      ...d,
+      users: d.users.map((x) => {
+        if (x.id !== u.id) return x;
+        const cur = x.reportPerms ?? [];
+        return { ...x, reportPerms: cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key] };
+      }),
+    }));
+
+  return (
+    <Panel title="Reports Assignment — Viewer accounts (NAD ITALLO only)">
+      {viewers.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No Viewer accounts yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full min-w-[720px] text-left text-xs">
+            <thead className="bg-black/30">
+              <tr>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold uppercase tracking-wider text-muted-foreground">
+                  Viewer
+                </th>
+                {REPORT_KEYS.map((r) => (
+                  <th key={r.key} className="px-2 py-2 text-center text-[10px] font-semibold uppercase text-muted-foreground">
+                    {r.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {viewers.map((u) => (
+                <tr key={u.id} className="border-t border-border">
+                  <td className="whitespace-nowrap px-3 py-2">
+                    <span className="font-semibold">{u.username}</span>
+                    <span className="block text-[10px] text-muted-foreground">{u.role}</span>
+                  </td>
+                  {REPORT_KEYS.map((r) => (
+                    <td key={r.key} className="px-2 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-[var(--primary)]"
+                        checked={(u.reportPerms ?? []).includes(r.key)}
+                        onChange={() => toggle(u, r.key)}
+                        aria-label={`${u.username} — ${r.label}`}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Viewers open the Reports page directly and can only search inside the reports ticked here.
+      </p>
+    </Panel>
+  );
+}
+
+/* ---------------- Private registration link + pending approvals ---------------- */
+
+function RegistrationPanel() {
+  const db = useDB();
+  const link = typeof window === "undefined" ? "/register" : `${window.location.origin}/register`;
+  const pending = db.registrations.filter((r) => r.status === "PENDING");
+
+  const approve = (id: string) =>
+    setDB((d) => {
+      const r = d.registrations.find((x) => x.id === id);
+      if (!r) return d;
+      if (d.users.some((u) => u.username.trim().toLowerCase() === r.username.trim().toLowerCase())) return d;
+      return {
+        ...d,
+        users: [
+          ...d.users,
+          {
+            id: uid(),
+            username: r.username,
+            password: r.password,
+            name: r.fullName,
+            position: r.position,
+            role: "Logistic User" as Role,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        registrations: d.registrations.map((x) => (x.id === id ? { ...x, status: "APPROVED" as const } : x)),
+      };
+    });
+
+  const reject = (id: string) =>
+    setDB((d) => ({
+      ...d,
+      registrations: d.registrations.map((x) => (x.id === id ? { ...x, status: "REJECTED" as const } : x)),
+    }));
+
+  return (
+    <Panel
+      title="Private Registration Link & Pending Approvals"
+      actions={
+        <button
+          className="btn-ghost-3d"
+          onClick={() => {
+            navigator.clipboard?.writeText(link);
+            toast.success("Registration link copied.");
+          }}
+        >
+          Copy link
+        </button>
+      }
+    >
+      <p className="mb-3 break-all text-[11px] text-muted-foreground">{link}</p>
+      {pending.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No pending registrations.</p>
+      ) : (
+        <DataTable
+          columns={["Date", "Emp ID", "Full Name", "Position", "Username", "Actions"]}
+          rows={pending.map((r) => [
+            r.date,
+            r.empId,
+            r.fullName,
+            r.position,
+            r.username,
+            <div className="flex gap-1">
+              <button className="btn-3d px-2" onClick={() => { approve(r.id); toast.success("Account activated."); }}>
+                Approve
+              </button>
+              <button className="btn-ghost-3d px-2" onClick={() => { reject(r.id); toast.success("Request rejected."); }}>
+                Reject
+              </button>
+            </div>,
+          ])}
+        />
+      )}
     </Panel>
   );
 }
