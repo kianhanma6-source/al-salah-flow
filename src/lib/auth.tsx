@@ -150,7 +150,7 @@ const ACCESS: Record<string, TabKey[]> = {
   Technician: PERSONAL,
   "Collection Team": PERSONAL,
   Client: ["dashboard"],
-  Viewer: ["dashboard", "myhr", "chat"],
+  Viewer: ["reports", "chat"],
   /* legacy */
   ADMIN: without("branding", "cleaning", ...NO_HR),
   USER: without("branding", "cleaning", "users", ...NO_HR),
