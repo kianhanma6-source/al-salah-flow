@@ -174,6 +174,15 @@ export const allowedTabs = (u: Pick<User, "role" | "perms"> | null | undefined):
 export const canAccess = (u: Pick<User, "role" | "perms"> | null | undefined, tab: TabKey) =>
   allowedTabs(u).includes(tab);
 
+/** Landing page after login — Viewers go straight to their Reports page. */
+export const homeRoute = (u: Pick<User, "role" | "perms"> | null | undefined) => {
+  const tabs = allowedTabs(u);
+  if (tabs.includes("dashboard")) return "/dashboard";
+  if (tabs.includes("reports")) return "/reports";
+  return "/dashboard";
+};
+
+
 /** View-only roles. */
 const READ_ONLY: string[] = ["Viewer", "Client", "VISITOR"];
 export const canWrite = (role: Role | undefined) => !!role && !READ_ONLY.includes(role);
