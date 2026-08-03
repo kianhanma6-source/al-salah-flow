@@ -153,9 +153,14 @@ function UsersPage() {
         </Panel>
       )}
 
+      {(isNadItallo || me?.role === "HR Admin") && <RegistrationPanel />}
+
       {isNadItallo && <AssignmentPanel users={assignable} />}
 
+      {isNadItallo && <ReportsAssignmentPanel users={assignable} />}
+
       {isNadItallo && <SignaturePanel />}
+
 
       <Panel
         title="User Displaylist"
