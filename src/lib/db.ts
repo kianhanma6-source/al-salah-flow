@@ -423,7 +423,9 @@ export const defaultDB = (): DB => ({
   attendance: [],
   signatureRecords: [],
   docSignatures: {},
+  registrations: [],
 });
+
 
 /** The two NAD ITALLO accounts are unique, cannot be duplicated, edited or deleted. */
 export function enforceProtectedAccounts(db: DB): DB {
