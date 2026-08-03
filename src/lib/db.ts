@@ -388,8 +388,11 @@ export const defaultDB = (): DB => ({
     contact: "Contact: +97165443485 / +971547701888",
     email: "Email: info@alhayahalsalah.ae",
     logo: "",
+    logoOffsetX: 0,
+    logoOffsetY: 0,
+    logoScale: 1,
     signatory1: "Prepared by: ______________________",
-    signatory2: "Approved by: ______________________",
+
   },
   users: PROTECTED_ACCOUNTS.map((u) => ({ ...u })),
   combos: {
