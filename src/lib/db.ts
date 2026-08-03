@@ -54,6 +54,8 @@ export interface User {
   locked?: boolean;
   /** Dashboard permissions assigned by NAD ITALLO (overrides role defaults). */
   perms?: string[];
+  /** Reports a Viewer account is allowed to open (assigned by NAD ITALLO). */
+  reportPerms?: string[];
   createdAt: string;
 }
 
@@ -66,7 +68,37 @@ export interface Branding {
   logo: string; // base64 or url
   signatory1: string;
   signatory2: string;
+  /** Report logo adjustment (mm offsets + scale factor) */
+  logoOffsetX?: number;
+  logoOffsetY?: number;
+  logoScale?: number;
 }
+
+/** Reports a Viewer account can be granted. */
+export const REPORT_KEYS: { key: string; label: string }[] = [
+  { key: "logistic", label: "Logistic Report" },
+  { key: "board", label: "Board Parts Report" },
+  { key: "installation", label: "Installation Report" },
+  { key: "wm", label: "WM Deployment Report" },
+  { key: "wmreturn", label: "WM Returned / Scrap Report" },
+  { key: "accomplishment", label: "Accomplishment Report" },
+  { key: "attendance", label: "Attendance Report" },
+  { key: "payroll", label: "Payroll Report" },
+  { key: "employees", label: "Employee Masterlist" },
+];
+
+/** Private registration request created through the HR registration link. */
+export interface Registration {
+  id: string;
+  username: string;
+  password: string;
+  empId: string;
+  fullName: string;
+  position: string;
+  date: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+}
+
 
 
 export interface InventoryRow {
