@@ -139,8 +139,9 @@ export function restoreJson(file: File) {
 }
 
 /** Shared branded header for every generated document:
- *  [ROUND LOGO] COMPANY NAME side by side, address / contact / email below the name,
- *  report title below the header block. Returns the Y position after the header. */
+ *  circular logo beside the header, company name / address / contact / email and the
+ *  report title ALWAYS centered on the page (the logo never shifts the centered text).
+ *  The logo can be moved and scaled through Branding (logoOffsetX / logoOffsetY / logoScale). */
 export async function drawReportHeader(
   doc: jsPDF,
   title: string,
@@ -148,43 +149,52 @@ export async function drawReportHeader(
 ): Promise<number> {
   const w = doc.internal.pageSize.getWidth();
   const top = 12;
+  const left = 14;
+  const scale = Math.max(0.3, Number(brand.logoScale ?? 1));
 
   let round = "";
   const logoSrc = brand.logo || defaultLogo;
   if (logoSrc) {
     try {
-      round = await toReportLogo(logoSrc, 512);
+      round = await toReportLogo(logoSrc, 512, 1);
     } catch {
       round = "";
     }
   }
 
-  const size = 20;
-  const left = 14;
-  let logoW = size;
+  const size = 20 * scale;
   if (round) {
     try {
-      const props = doc.getImageProperties(round);
-      logoW = Math.min(34, (props.width / props.height) * size);
-      doc.addImage(round, "PNG", left, top, logoW, size);
+      doc.addImage(
+        round,
+        "PNG",
+        left + Number(brand.logoOffsetX ?? 0),
+        top + Number(brand.logoOffsetY ?? 0),
+        size,
+        size,
+      );
     } catch {
       /* ignore */
     }
   }
-  const textX = round ? left + logoW + 6 : left;
+
+  // Header text is always centered on the page, independent of the logo.
+  const center = w / 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(brand.companyName, textX, top + (round ? size / 2 + 1.5 : 5));
+  doc.text(brand.companyName, center, top + 7, { align: "center" });
 
-  let y = top + (round ? size + 6 : 12);
+  let y = top + 13;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   [brand.addressLine1, brand.addressLine2, brand.contact, brand.email]
     .filter(Boolean)
     .forEach((line) => {
-      doc.text(String(line), textX, y);
+      doc.text(String(line), center, y, { align: "center" });
       y += 5;
     });
+
+  y = Math.max(y, top + size + 2);
 
   doc.setDrawColor(17, 46, 82);
   doc.setLineWidth(0.6);
@@ -193,10 +203,11 @@ export async function drawReportHeader(
   if (title) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(title.toUpperCase(), w / 2, y + 8, { align: "center" });
+    doc.text(title.toUpperCase(), center, y + 8, { align: "center" });
   }
   return y + 8;
 }
+
 
 /** Standard footer: assigned signature image (if any) + signatories + programmer version tag. */
 export function drawReportFooter(
