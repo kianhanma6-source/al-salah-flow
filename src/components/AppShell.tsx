@@ -22,6 +22,7 @@ const TABS: { key: TabKey; to: string; label: string }[] = [
   { key: "gps", to: "/gps-monitor", label: "GPS Monitoring" },
   { key: "myhr", to: "/my-hr", label: "My HR" },
   { key: "chat", to: "/chat", label: "Group Chat" },
+  { key: "reports", to: "/reports", label: "Reports" },
   { key: "users", to: "/users", label: "User Management" },
   { key: "backup", to: "/backup", label: "Backup & Data" },
   { key: "cleaning", to: "/data-cleaning", label: "Data Cleaning" },
@@ -40,7 +41,7 @@ export function ReportHeader() {
             alt="Company logo"
             width={64}
             height={64}
-            className="relative h-14 w-auto max-w-24 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+            className="relative size-14 rounded-full border border-primary/40 bg-white/5 object-contain p-1 drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
           />
         </div>
         <div className="min-w-0">
