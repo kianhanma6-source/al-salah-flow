@@ -71,7 +71,13 @@ function BrandingPage() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-black/20 p-6">
-          <img src={form.logo || defaultLogo} alt="Company logo preview" width={128} height={128} className="size-32 object-contain" />
+          <img
+            src={form.logo || defaultLogo}
+            alt="Company logo preview"
+            width={128}
+            height={128}
+            className="size-32 rounded-full border border-primary/40 bg-white/5 object-contain p-1 shadow-[var(--shadow-3d)]"
+          />
           <button className="btn-ghost-3d" onClick={() => ref.current?.click()}>
             <Upload className="size-4" /> Upload new logo
           </button>
@@ -91,10 +97,87 @@ function BrandingPage() {
               if (f) setForm({ ...form, logo: await toLogoBase64(f) });
             }}
           />
+
+          <div className="w-full space-y-2 border-t border-border pt-3">
+            <p className="text-center text-[11px] font-bold uppercase tracking-wide text-primary">
+              Report logo position &amp; size
+            </p>
+            <div className="flex flex-wrap justify-center gap-1">
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoOffsetY: (form.logoOffsetY ?? 0) - 2 })}
+              >
+                ↑
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoOffsetY: (form.logoOffsetY ?? 0) + 2 })}
+              >
+                ↓
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoOffsetX: (form.logoOffsetX ?? 0) - 2 })}
+              >
+                ←
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoOffsetX: (form.logoOffsetX ?? 0) + 2 })}
+              >
+                →
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoScale: Math.min(3, (form.logoScale ?? 1) + 0.1) })}
+              >
+                Larger
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoScale: Math.max(0.3, (form.logoScale ?? 1) - 0.1) })}
+              >
+                Smaller
+              </button>
+              <button
+                className="btn-ghost-3d px-2"
+                onClick={() => setForm({ ...form, logoOffsetX: 0, logoOffsetY: 0, logoScale: 1 })}
+              >
+                Reset
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Field label="X (mm)">
+                <Input
+                  type="number"
+                  value={form.logoOffsetX ?? 0}
+                  onChange={(e) => setForm({ ...form, logoOffsetX: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Y (mm)">
+                <Input
+                  type="number"
+                  value={form.logoOffsetY ?? 0}
+                  onChange={(e) => setForm({ ...form, logoOffsetY: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Scale">
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={form.logoScale ?? 1}
+                  onChange={(e) => setForm({ ...form, logoScale: Number(e.target.value) })}
+                />
+              </Field>
+            </div>
+          </div>
+
           <p className="text-center text-[11px] text-muted-foreground">
-            This logo appears on the login page, every page header and all PDF reports.
+            The logo is always shown inside a perfect circle. Report headers stay centered on the page no
+            matter where the logo is placed.
           </p>
         </div>
+
       </div>
     </Panel>
   );
