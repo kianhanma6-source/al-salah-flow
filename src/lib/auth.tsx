@@ -98,6 +98,7 @@ export type TabKey =
   | "attendance"
   | "gps"
   | "chat"
+  | "reports"
   | "backup"
   | "cleaning"
   | "branding";
@@ -119,11 +120,13 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "gps", label: "GPS Monitoring" },
   { key: "myhr", label: "My HR Dashboard" },
   { key: "chat", label: "Group Chat" },
+  { key: "reports", label: "Reports" },
   { key: "users", label: "User Management" },
   { key: "backup", label: "Backup & Data" },
   { key: "cleaning", label: "Data Cleaning" },
   { key: "branding", label: "Re-Branding" },
 ];
+
 
 const EVERY: TabKey[] = ALL_TABS.map((t) => t.key);
 const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
