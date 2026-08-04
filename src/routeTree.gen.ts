@@ -14,6 +14,7 @@ import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -59,6 +60,11 @@ const StoreRoute = StoreRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServiceRoute = ServiceRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/store': typeof StoreRoute
   '/users': typeof UsersRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/store': typeof StoreRoute
   '/users': typeof UsersRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/store': typeof StoreRoute
   '/users': typeof UsersRoute
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/service'
+    | '/shop'
     | '/sitemap.xml'
     | '/store'
     | '/users'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/service'
+    | '/shop'
     | '/sitemap.xml'
     | '/store'
     | '/users'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/service'
+    | '/shop'
     | '/sitemap.xml'
     | '/store'
     | '/users'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
   ServiceRoute: typeof ServiceRoute
+  ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StoreRoute: typeof StoreRoute
   UsersRoute: typeof UsersRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/service': {
@@ -577,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
   ServiceRoute: ServiceRoute,
+  ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StoreRoute: StoreRoute,
   UsersRoute: UsersRoute,
