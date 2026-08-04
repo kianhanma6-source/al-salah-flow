@@ -158,7 +158,93 @@ export interface Combos {
   wmName: string[];
   wmModel: string[];
   position: string[];
+  technician: string[];
+  assistant: string[];
 }
+
+/* ---------------- Customer Service + Product Store ---------------- */
+
+export type ServiceStatus = "RECEIVED" | "ASSIGNED" | "ACCEPTED" | "FIXED";
+
+export const SERVICE_STATUS_TEXT: Record<ServiceStatus, string> = {
+  RECEIVED: "We have received your concern and will take immediate action.",
+  ASSIGNED: "Your concern has been approved and a technician was assigned.",
+  ACCEPTED: "The technician has accepted your concern.",
+  FIXED: "Your concern has been fixed.",
+};
+
+export interface ServiceConcern {
+  id: string;
+  date: string;
+  wmName: string;
+  wmNo: string;
+  wmKeyNo: string;
+  photos: string[];
+  remarks: string;
+  companyName: string;
+  clientName: string;
+  address: string;
+  lat?: number;
+  lng?: number;
+  contact: string;
+  email?: string;
+  technician: string;
+  assistant: string;
+  status: ServiceStatus;
+  approved: boolean;
+  /** login account that filed the concern (client) */
+  clientUserId?: string;
+  /** technician login account assigned (auto-matched by name) */
+  technicianUserId?: string;
+  /** salesperson permanently linked to this customer */
+  salespersonId?: string;
+  techPhotos: string[];
+  techRemarks: string;
+  createdAt: string;
+}
+
+export interface Product {
+  id: string;
+  photo: string;
+  name: string;
+  model: string;
+  price: number;
+  /** commission per unit in AED */
+  commission: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface StoreOrder {
+  id: string;
+  date: string;
+  productId: string;
+  productName: string;
+  model: string;
+  qty: number;
+  repName: string;
+  contact: string;
+  email: string;
+  companyName: string;
+  location: string;
+  lat?: number;
+  lng?: number;
+  salespersonId: string;
+  commissionPerUnit: number;
+  commissionTotal: number;
+  approved: boolean;
+}
+
+export interface Withdrawal {
+  id: string;
+  salespersonId: string;
+  salespersonName: string;
+  amount: number;
+  date: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  decidedAt?: string;
+}
+
 
 /* ---------------- HR (Day 1) ---------------- */
 
