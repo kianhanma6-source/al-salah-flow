@@ -158,7 +158,93 @@ export interface Combos {
   wmName: string[];
   wmModel: string[];
   position: string[];
+  technician: string[];
+  assistant: string[];
 }
+
+/* ---------------- Customer Service + Product Store ---------------- */
+
+export type ServiceStatus = "RECEIVED" | "ASSIGNED" | "ACCEPTED" | "FIXED";
+
+export const SERVICE_STATUS_TEXT: Record<ServiceStatus, string> = {
+  RECEIVED: "We have received your concern and will take immediate action.",
+  ASSIGNED: "Your concern has been approved and a technician was assigned.",
+  ACCEPTED: "The technician has accepted your concern.",
+  FIXED: "Your concern has been fixed.",
+};
+
+export interface ServiceConcern {
+  id: string;
+  date: string;
+  wmName: string;
+  wmNo: string;
+  wmKeyNo: string;
+  photos: string[];
+  remarks: string;
+  companyName: string;
+  clientName: string;
+  address: string;
+  lat?: number;
+  lng?: number;
+  contact: string;
+  email?: string;
+  technician: string;
+  assistant: string;
+  status: ServiceStatus;
+  approved: boolean;
+  /** login account that filed the concern (client) */
+  clientUserId?: string;
+  /** technician login account assigned (auto-matched by name) */
+  technicianUserId?: string;
+  /** salesperson permanently linked to this customer */
+  salespersonId?: string;
+  techPhotos: string[];
+  techRemarks: string;
+  createdAt: string;
+}
+
+export interface Product {
+  id: string;
+  photo: string;
+  name: string;
+  model: string;
+  price: number;
+  /** commission per unit in AED */
+  commission: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface StoreOrder {
+  id: string;
+  date: string;
+  productId: string;
+  productName: string;
+  model: string;
+  qty: number;
+  repName: string;
+  contact: string;
+  email: string;
+  companyName: string;
+  location: string;
+  lat?: number;
+  lng?: number;
+  salespersonId: string;
+  commissionPerUnit: number;
+  commissionTotal: number;
+  approved: boolean;
+}
+
+export interface Withdrawal {
+  id: string;
+  salespersonId: string;
+  salespersonName: string;
+  amount: number;
+  date: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  decidedAt?: string;
+}
+
 
 /* ---------------- HR (Day 1) ---------------- */
 
@@ -349,6 +435,10 @@ export interface DB {
   signatureRecords: SignatureRecord[];
   docSignatures: Partial<Record<DocKey, SignatureAssignment>>;
   registrations: Registration[];
+  service: ServiceConcern[];
+  products: Product[];
+  orders: StoreOrder[];
+  withdrawals: Withdrawal[];
 }
 
 
@@ -405,6 +495,8 @@ export const defaultDB = (): DB => ({
     wmName: [],
     wmModel: [],
     position: [],
+    technician: [],
+    assistant: [],
   },
   modules: {
     logistic: emptyModule(),
@@ -424,6 +516,10 @@ export const defaultDB = (): DB => ({
   signatureRecords: [],
   docSignatures: {},
   registrations: [],
+  service: [],
+  products: [],
+  orders: [],
+  withdrawals: [],
 });
 
 
@@ -459,6 +555,10 @@ function hydrate(parsed: Partial<DB>): DB {
     signatureRecords: parsed.signatureRecords ?? [],
     docSignatures: parsed.docSignatures ?? {},
     registrations: parsed.registrations ?? [],
+    service: parsed.service ?? [],
+    products: parsed.products ?? [],
+    orders: parsed.orders ?? [],
+    withdrawals: parsed.withdrawals ?? [],
   });
 
 }
@@ -717,4 +817,79 @@ export function computeNet(r: PayrollRow) {
 
 export function dailyRate(basic: number, workingDays: number) {
   return workingDays > 0 ? (Number(basic) || 0) / workingDays : 0;
+}
+
+/* ---------------- Store / Service helpers ---------------- */
+
+/** Referral link for a salesperson account. */
+export function referralLink(userId: string) {
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  return `${origin}/shop?ref=${encodeURIComponent(userId)}`;
+}
+
+const norm = (v?: string) => (v ?? "").trim().toLowerCase();
+
+/** A customer is permanently linked to the salesperson of their first order. */
+export function salespersonForCustomer(
+  orders: StoreOrder[],
+  customer: { companyName?: string; email?: string; contact?: string },
+): string | undefined {
+  const match = [...orders]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .find(
+      (o) =>
+        (norm(customer.companyName) && norm(o.companyName) === norm(customer.companyName)) ||
+        (norm(customer.email) && norm(o.email) === norm(customer.email)) ||
+        (norm(customer.contact) && norm(o.contact) === norm(customer.contact)),
+    );
+  return match?.salespersonId;
+}
+
+/** Approved commissions minus approved withdrawals, in AED. */
+export function commissionBalance(db: DB, salespersonId: string) {
+  const earned = db.orders
+    .filter((o) => o.salespersonId === salespersonId && o.approved)
+    .reduce((s, o) => s + (Number(o.commissionTotal) || 0), 0);
+  const withdrawn = db.withdrawals
+    .filter((w) => w.salespersonId === salespersonId && w.status === "APPROVED")
+    .reduce((s, w) => s + (Number(w.amount) || 0), 0);
+  const pending = db.withdrawals
+    .filter((w) => w.salespersonId === salespersonId && w.status === "PENDING")
+    .reduce((s, w) => s + (Number(w.amount) || 0), 0);
+  return { earned, withdrawn, pending, balance: earned - withdrawn };
+}
+
+export const AED = (n: number) =>
+  `AED ${(Number(n) || 0).toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+export type ChartRange = "week" | "month" | "year";
+
+function bucketKey(date: string, range: ChartRange) {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  if (range === "year") return String(d.getFullYear());
+  if (range === "month") return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const first = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d.getTime() - first.getTime()) / 86400000 + first.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+/** Sales + commission grouped per week / month / year. */
+export function salesSeries(orders: StoreOrder[], range: ChartRange) {
+  const map = new Map<string, { period: string; units: number; commission: number; orders: number }>();
+  orders.forEach((o) => {
+    const key = bucketKey(o.date, range);
+    if (!map.has(key)) map.set(key, { period: key, units: 0, commission: 0, orders: 0 });
+    const row = map.get(key)!;
+    row.units += Number(o.qty) || 0;
+    row.commission += Number(o.commissionTotal) || 0;
+    row.orders += 1;
+  });
+  return [...map.values()].sort((a, b) => a.period.localeCompare(b.period));
+}
+
+export function mapsLink(lat?: number, lng?: number, address?: string) {
+  if (typeof lat === "number" && typeof lng === "number")
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address ?? "")}`;
 }

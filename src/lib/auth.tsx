@@ -98,6 +98,8 @@ export type TabKey =
   | "attendance"
   | "gps"
   | "chat"
+  | "service"
+  | "store"
   | "reports"
   | "backup"
   | "cleaning"
@@ -120,6 +122,8 @@ export const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "gps", label: "GPS Monitoring" },
   { key: "myhr", label: "My HR Dashboard" },
   { key: "chat", label: "Group Chat" },
+  { key: "service", label: "Customer Service" },
+  { key: "store", label: "Product Store" },
   { key: "reports", label: "Reports" },
   { key: "users", label: "User Management" },
   { key: "backup", label: "Backup & Data" },
@@ -135,6 +139,8 @@ const without = (...omit: TabKey[]) => EVERY.filter((t) => !omit.includes(t));
 const NO_HR: TabKey[] = ["hr", "hrbenefits", "payroll", "coe", "idcard", "gps"];
 /** Personal HR dashboard + group chat: everyone except clients. */
 const PERSONAL: TabKey[] = ["dashboard", "myhr", "chat", "attendance"];
+/** Customer service + product store dashboards. */
+const BUSINESS: TabKey[] = ["service", "store"];
 
 /** Default dashboards per role (NAD ITALLO can override per user). */
 const ACCESS: Record<string, TabKey[]> = {
@@ -144,19 +150,19 @@ const ACCESS: Record<string, TabKey[]> = {
   "Logistic User": without("branding", "cleaning", "users", ...NO_HR),
   "Warehouse Admin": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", ...NO_HR),
   "Warehouse User": without("branding", "cleaning", "logistic", "board", "wmreturn", "accomplishment", "users", ...NO_HR),
-  Manager: [...PERSONAL, "gps"],
-  "HR Admin": ["dashboard", "hr", "hrbenefits", "payroll", "coe", "idcard", "myhr", "chat", "attendance", "gps"],
-  "Sales Person": PERSONAL,
-  Technician: PERSONAL,
+  Manager: [...PERSONAL, "gps", ...BUSINESS],
+  "HR Admin": ["dashboard", "hr", "hrbenefits", "payroll", "coe", "idcard", "myhr", "chat", "attendance", "gps", ...BUSINESS],
+  "Sales Person": [...PERSONAL, ...BUSINESS],
+  Technician: [...PERSONAL, "service"],
   "Collection Team": PERSONAL,
-  Client: ["dashboard"],
+  Client: ["dashboard", ...BUSINESS],
   Viewer: ["reports", "chat"],
   /* legacy */
   ADMIN: without("branding", "cleaning", ...NO_HR),
   USER: without("branding", "cleaning", "users", ...NO_HR),
   VISITOR: ["dashboard"],
   "Collection team": PERSONAL,
-  Sales: PERSONAL,
+  Sales: [...PERSONAL, ...BUSINESS],
   "WM Deployment": PERSONAL,
   Logistic: without("branding", "cleaning", ...NO_HR),
 };

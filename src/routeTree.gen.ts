@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as StoreRouteImport } from './routes/store'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ShopRouteImport } from './routes/shop'
+import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PayrollRouteImport } from './routes/payroll'
@@ -49,9 +52,24 @@ const UsersRoute = UsersRouteImport.update({
   path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoreRoute = StoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceRoute = ServiceRouteImport.update({
+  id: '/service',
+  path: '/service',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -176,7 +194,10 @@ export interface FileRoutesByFullPath {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof StoreRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -202,7 +223,10 @@ export interface FileRoutesByTo {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof StoreRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -229,7 +253,10 @@ export interface FileRoutesById {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof StoreRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
   '/wm-returned': typeof WmReturnedRoute
@@ -257,7 +284,10 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
+    | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -283,7 +313,10 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
+    | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -309,7 +342,10 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
+    | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/users'
     | '/wm-deployment'
     | '/wm-returned'
@@ -336,7 +372,10 @@ export interface RootRouteChildren {
   PayrollRoute: typeof PayrollRoute
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
+  ServiceRoute: typeof ServiceRoute
+  ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StoreRoute: typeof StoreRoute
   UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
   WmReturnedRoute: typeof WmReturnedRoute
@@ -365,11 +404,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/store': {
+      id: '/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof StoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service': {
+      id: '/service'
+      path: '/service'
+      fullPath: '/service'
+      preLoaderRoute: typeof ServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -536,7 +596,10 @@ const rootRouteChildren: RootRouteChildren = {
   PayrollRoute: PayrollRoute,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
+  ServiceRoute: ServiceRoute,
+  ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StoreRoute: StoreRoute,
   UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,
   WmReturnedRoute: WmReturnedRoute,

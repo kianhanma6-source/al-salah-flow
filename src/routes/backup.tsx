@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { Panel } from "@/components/ui-kit";
 import { getDB, useDB } from "@/lib/db";
 import { backupJson, exportAllExcel, exportAllPDF, importAllExcel, restoreJson } from "@/lib/reports";
+import { exportAllExcelWithImages, importAllExcelWithImages } from "@/lib/excel-images";
 
 export const Route = createFileRoute("/backup")({
   head: () => ({
@@ -29,6 +30,7 @@ function BackupPage() {
   const db = useDB();
   const jsonRef = useRef<HTMLInputElement>(null);
   const xlsRef = useRef<HTMLInputElement>(null);
+  const imgXlsRef = useRef<HTMLInputElement>(null);
 
   // Auto-backup once per calendar day.
   useEffect(() => {
@@ -65,6 +67,18 @@ function BackupPage() {
           <button className="btn-3d" onClick={() => exportAllPDF(getDB())}>
             <FileDown className="size-4" /> PDF all data
           </button>
+          <button
+            className="btn-3d"
+            onClick={async () => {
+              await exportAllExcelWithImages(getDB());
+              toast.success("Excel exported with photos.");
+            }}
+          >
+            <FileSpreadsheet className="size-4" /> Export Excel + photos
+          </button>
+          <button className="btn-3d" onClick={() => imgXlsRef.current?.click()}>
+            <Upload className="size-4" /> Import Excel + photos
+          </button>
         </div>
         <input
           ref={jsonRef}
@@ -90,6 +104,23 @@ function BackupPage() {
             if (!f) return;
             await importAllExcel(f);
             toast.success("Excel data imported.");
+          }}
+        />
+        <input
+          ref={imgXlsRef}
+          type="file"
+          accept=".xlsx"
+          hidden
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (!f) return;
+            try {
+              await importAllExcelWithImages(f);
+              toast.success("Data and photos restored from Excel.");
+            } catch {
+              toast.error("Could not read that workbook.");
+            }
           }}
         />
       </Panel>
