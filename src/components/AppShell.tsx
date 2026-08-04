@@ -22,6 +22,8 @@ const TABS: { key: TabKey; to: string; label: string }[] = [
   { key: "gps", to: "/gps-monitor", label: "GPS Monitoring" },
   { key: "myhr", to: "/my-hr", label: "My HR" },
   { key: "chat", to: "/chat", label: "Group Chat" },
+  { key: "service", to: "/service", label: "Customer Service" },
+  { key: "store", to: "/store", label: "Product Store" },
   { key: "reports", to: "/reports", label: "Reports" },
   { key: "users", to: "/users", label: "User Management" },
   { key: "backup", to: "/backup", label: "Backup & Data" },
