@@ -13,6 +13,7 @@ import { Route as WmReturnedRouteImport } from './routes/wm-returned'
 import { Route as WmDeploymentRouteImport } from './routes/wm-deployment'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PayrollRouteImport } from './routes/payroll'
@@ -52,6 +53,11 @@ const UsersRoute = UsersRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceRoute = ServiceRouteImport.update({
+  id: '/service',
+  path: '/service',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/payroll': typeof PayrollRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
+  '/service': typeof ServiceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/users': typeof UsersRoute
   '/wm-deployment': typeof WmDeploymentRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/register'
     | '/reports'
+    | '/service'
     | '/sitemap.xml'
     | '/users'
     | '/wm-deployment'
@@ -336,6 +348,7 @@ export interface RootRouteChildren {
   PayrollRoute: typeof PayrollRoute
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
+  ServiceRoute: typeof ServiceRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UsersRoute: typeof UsersRoute
   WmDeploymentRoute: typeof WmDeploymentRoute
@@ -370,6 +383,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service': {
+      id: '/service'
+      path: '/service'
+      fullPath: '/service'
+      preLoaderRoute: typeof ServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -536,6 +556,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayrollRoute: PayrollRoute,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
+  ServiceRoute: ServiceRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UsersRoute: UsersRoute,
   WmDeploymentRoute: WmDeploymentRoute,

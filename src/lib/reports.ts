@@ -311,3 +311,32 @@ export function exportAllPDF(db: DB = getDB()) {
 
   );
 }
+
+/** Commission withdrawal receipt — uses the existing branded report format. */
+export async function exportWithdrawalReceipt(w: {
+  id: string;
+  salespersonName: string;
+  amount: number;
+  date: string;
+  balanceAfter: number;
+}) {
+  const brand = getDB().branding;
+  const doc = new jsPDF();
+  const y = await drawReportHeader(doc, "Commission Withdrawal Receipt", brand);
+  autoTable(doc, {
+    startY: y + 13,
+    head: [["Field", "Details"]],
+    body: [
+      ["Receipt No.", w.id.toUpperCase()],
+      ["Date", w.date],
+      ["Salesperson", w.salespersonName],
+      ["Amount Released", `AED ${Number(w.amount).toFixed(2)}`],
+      ["Remaining Balance", `AED ${Number(w.balanceAfter).toFixed(2)}`],
+      ["Status", "APPROVED"],
+    ],
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [17, 46, 82] },
+    didDrawPage: () => drawReportFooter(doc, brand, "all"),
+  });
+  doc.save(`Commission_Withdrawal_${w.id}.pdf`);
+}
