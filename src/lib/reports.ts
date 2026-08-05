@@ -327,9 +327,32 @@ export async function exportPDF(
   docKey: DocKey = "all",
 ) {
   const brand = b ?? getDB().branding;
-  const withPhotos = !!photos?.some(Boolean);
-  const cols = withPhotos ? ["Photo", ...columns] : columns;
-  const body = withPhotos ? rows.map((r) => ["", ...r]) : rows;
+
+  // qty before unit ("200 pcs") — the Unit column is merged into Qty
+  let columnsF = columns;
+  let rowsF = rows;
+  const ui = columns.findIndex((c) => c.trim().toLowerCase() === "unit");
+  const qi = columns.findIndex((c) => c.trim().toLowerCase() === "qty");
+  if (ui >= 0 && qi >= 0) {
+    columnsF = columns.filter((_c, i) => i !== qi).map((c, i) => (i === (qi < ui ? ui - 1 : ui) ? "Qty" : c));
+    rowsF = rows.map((r) =>
+      r
+        .filter((_v, i) => i !== qi)
+        .map((v, i) => (i === (qi < ui ? ui - 1 : ui) ? `${r[qi] ?? 0} ${r[ui] ?? ""}`.trim() : v)),
+    );
+  }
+
+  // reports sort A → Z (photos follow their row)
+  const order = rowsF
+    .map((r, i) => ({ i, k: r.join(" ").toLowerCase() }))
+    .sort((a, c) => a.k.localeCompare(c.k, undefined, { numeric: true }));
+  const sortedRows = order.map((o) => rowsF[o.i]);
+  const sortedPhotos = photos ? order.map((o) => photos[o.i]) : undefined;
+
+  const withPhotos = !!sortedPhotos?.some(Boolean);
+  const cols = withPhotos ? ["Photo", ...columnsF] : columnsF;
+  const body = withPhotos ? sortedRows.map((r) => ["", ...r]) : sortedRows;
+  photos = sortedPhotos;
   const doc = new jsPDF({ orientation: cols.length > 6 ? "landscape" : "portrait" });
   const y = await drawReportHeader(doc, title, brand);
 
