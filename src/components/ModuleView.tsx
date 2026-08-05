@@ -293,7 +293,13 @@ export function ModuleView({
                   onClick={() =>
                     exportExcel(
                       "Inventory",
-                      invRows as unknown as Record<string, unknown>[],
+                      invRows.map((r) => ({
+                        Photo: r.photo || "",
+                        [nameLabel]: r.materialName,
+                        Model: r.model,
+                        Qty: `${r.qty} ${r.unit}`.trim(),
+                        Date: r.date,
+                      })) as unknown as Record<string, unknown>[],
                       `${moduleKey}_inventory`,
                     )
                   }
@@ -305,8 +311,8 @@ export function ModuleView({
                   onClick={() =>
                     exportPDF(
                       `${title} Inventory Report`,
-                      ["Trans No", "Date", nameLabel, "Model", "Unit", "Qty"],
-                      invRows.map((r) => [r.transNo, r.date, r.materialName, r.model, r.unit, r.qty]),
+                      [nameLabel, "Model", "Qty", "Date"],
+                      invRows.map((r) => [r.materialName, r.model, `${r.qty} ${r.unit}`.trim(), r.date]),
                       undefined,
                       invRows.map((r) => r.photo || undefined),
                     )
@@ -314,6 +320,7 @@ export function ModuleView({
                 >
                   <FileDown className="size-4" /> PDF
                 </button>
+
               </>
             }
           >
