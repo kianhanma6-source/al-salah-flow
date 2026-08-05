@@ -140,7 +140,11 @@ function Frame({
   logout: () => void;
   children: ReactNode;
 }) {
-  const visible = TABS.filter((t) => canAccess(user, t.key));
+  const nadOnly = isProgrammerIV(user.role);
+  const groups = MENU_GROUPS.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => i.key !== "branding" || nadOnly),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <div className="relative min-h-screen">
@@ -149,7 +153,7 @@ function Frame({
 
       <header className="sticky top-0 z-30 glass">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
-          <button className="btn-ghost-3d lg:hidden" onClick={() => setOpen(!open)}>
+          <button className="btn-ghost-3d" onClick={() => setOpen(!open)} aria-label="Menu">
             {open ? <X className="size-4" /> : <Menu className="size-4" />}
           </button>
           <span className="display text-xs font-bold uppercase tracking-[0.2em] brand-text sm:text-sm">
@@ -165,27 +169,68 @@ function Frame({
             </button>
           </div>
         </div>
-        <nav
-          className={`${open ? "block" : "hidden"} border-t border-border lg:block`}
-          onClick={() => setOpen(false)}
-        >
-          <div className="mx-auto flex max-w-7xl flex-wrap gap-1 px-3 py-2">
-            {visible.map((t) => (
-              <Link
-                key={t.key}
-                to={t.to}
-                className={`rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all ${
-                  pathname === t.to
-                    ? "bg-primary text-primary-foreground shadow-[var(--shadow-glow)]"
-                    : "text-muted-foreground hover:bg-white/10 hover:text-foreground"
-                }`}
-              >
-                {t.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
       </header>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto border-r border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <span className="display text-[11px] font-bold uppercase tracking-[0.2em] brand-text">
+            Main Menu
+          </span>
+          <button className="btn-ghost-3d px-2" onClick={() => setOpen(false)} aria-label="Close menu">
+            <X className="size-4" />
+          </button>
+        </div>
+        <nav className="pb-8">
+          {groups.map((g) => (
+            <div key={g.title}>
+              <div className="bg-muted/70 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/80">
+                {g.title}
+              </div>
+              <div className="space-y-0.5 p-2">
+                {g.items.map((t) => {
+                  const allowed = canAccess(user, t.key);
+                  if (!allowed)
+                    return (
+                      <div
+                        key={t.key}
+                        aria-disabled="true"
+                        className="flex cursor-not-allowed items-center justify-between rounded-md px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/40"
+                      >
+                        {t.label}
+                        <Lock className="size-3" />
+                      </div>
+                    );
+                  return (
+                    <Link
+                      key={t.key}
+                      to={t.to}
+                      onClick={() => setOpen(false)}
+                      className={`block rounded-md px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition-all ${
+                        pathname === t.to
+                          ? "bg-primary text-primary-foreground shadow-[var(--shadow-glow)]"
+                          : "text-foreground/85 hover:bg-white/10 hover:text-foreground"
+                      }`}
+                    >
+                      {t.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
 
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
         <ReportHeader />
