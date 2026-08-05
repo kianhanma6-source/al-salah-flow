@@ -110,7 +110,11 @@ function ReportsPage() {
   const needle = q.trim().toLowerCase();
   const filtered = assigned.map((r) => ({
     ...r,
-    rows: needle ? r.rows.filter((row) => row.join(" ").toLowerCase().includes(needle)) : r.rows,
+    rows: (needle ? r.rows.filter((row) => row.join(" ").toLowerCase().includes(needle)) : r.rows)
+      .slice()
+      .sort((a, b) =>
+        a.join(" ").toLowerCase().localeCompare(b.join(" ").toLowerCase(), undefined, { numeric: true }),
+      ),
   }));
 
   return (

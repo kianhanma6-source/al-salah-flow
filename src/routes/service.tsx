@@ -215,6 +215,7 @@ function ServicePage() {
   };
 
   const excelRows = rows.map((c) => ({
+    Photo: c.photos?.[0] ?? "",
     Date: c.date,
     "WM Name": c.wmName,
     "WM No": c.wmNo,

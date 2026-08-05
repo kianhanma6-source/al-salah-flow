@@ -112,7 +112,7 @@ function AccomplishmentPage() {
         title="Accomplishment Displaylist"
         actions={
           <>
-            <button className="btn-ghost-3d" onClick={() => exportExcel("Accomplishment", rows.map(({ photo: _p, ...r }) => r), "accomplishment")}>
+            <button className="btn-ghost-3d" onClick={() => exportExcel("Accomplishment", rows.map((r) => ({ Photo: r.photo, Date: r.date, Name: r.name, Area: r.area, Activity: r.activity, Qty: r.qty })), "accomplishment")}>
               <FileSpreadsheet className="size-4" /> Excel
             </button>
             <button
