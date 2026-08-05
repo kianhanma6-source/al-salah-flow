@@ -347,7 +347,8 @@ export async function exportPDF(
     .map((r, i) => ({ i, k: r.join(" ").toLowerCase() }))
     .sort((a, c) => a.k.localeCompare(c.k, undefined, { numeric: true }));
   const sortedRows = order.map((o) => rowsF[o.i]);
-  const sortedPhotos = photos ? order.map((o) => photos[o.i]) : undefined;
+  const srcPhotos = photos;
+  const sortedPhotos = srcPhotos ? order.map((o) => srcPhotos[o.i]) : undefined;
 
   const withPhotos = !!sortedPhotos?.some(Boolean);
   const cols = withPhotos ? ["Photo", ...columnsF] : columnsF;
