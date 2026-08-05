@@ -1,34 +1,61 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut, Menu, X } from "lucide-react";
+import { Lock, LogOut, Menu, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { canAccess, useAuth, type TabKey } from "@/lib/auth";
+import { canAccess, isProgrammerIV, useAuth, type TabKey } from "@/lib/auth";
 import { PROGRAMMER_TAG, useDB, type User } from "@/lib/db";
 import defaultLogo from "@/assets/logo.png";
 
-const TABS: { key: TabKey; to: string; label: string }[] = [
-  { key: "dashboard", to: "/dashboard", label: "Dashboard" },
-  { key: "logistic", to: "/logistic", label: "Logistic" },
-  { key: "board", to: "/board", label: "Board Parts" },
-  { key: "installation", to: "/installation", label: "Installation" },
-  { key: "wm", to: "/wm-deployment", label: "WM Deployment" },
-  { key: "wmreturn", to: "/wm-returned", label: "WM Returned / Scrap" },
-  { key: "accomplishment", to: "/accomplishment", label: "Accomplishment" },
-  { key: "hr", to: "/hr-employees", label: "Employee Info" },
-  { key: "hrbenefits", to: "/hr-benefits", label: "Benefits & Deductions" },
-  { key: "payroll", to: "/payroll", label: "Payroll" },
-  { key: "coe", to: "/coe", label: "COE" },
-  { key: "idcard", to: "/id-card", label: "Employee ID" },
-  { key: "attendance", to: "/attendance", label: "Daily Attendance" },
-  { key: "gps", to: "/gps-monitor", label: "GPS Monitoring" },
-  { key: "myhr", to: "/my-hr", label: "My HR" },
-  { key: "chat", to: "/chat", label: "Group Chat" },
-  { key: "service", to: "/service", label: "Customer Service" },
-  { key: "store", to: "/store", label: "Product Store" },
-  { key: "reports", to: "/reports", label: "Reports" },
-  { key: "users", to: "/users", label: "User Management" },
-  { key: "backup", to: "/backup", label: "Backup & Data" },
-  { key: "cleaning", to: "/data-cleaning", label: "Data Cleaning" },
-  { key: "branding", to: "/branding", label: "Re-Branding" },
+type MenuItem = { key: TabKey; to: string; label: string };
+
+const MENU_GROUPS: { title: string; items: MenuItem[] }[] = [
+  {
+    title: "AL HAYAH AL SALAH",
+    items: [
+      { key: "dashboard", to: "/dashboard", label: "Dashboard" },
+      { key: "chat", to: "/chat", label: "Group Chat" },
+    ],
+  },
+  {
+    title: "Warehouse / Logistics",
+    items: [
+      { key: "logistic", to: "/logistic", label: "Logistic" },
+      { key: "board", to: "/board", label: "Board Parts" },
+      { key: "installation", to: "/installation", label: "Installation" },
+      { key: "wm", to: "/wm-deployment", label: "WM Deployment" },
+      { key: "wmreturn", to: "/wm-returned", label: "WM Returned / Scrap" },
+      { key: "accomplishment", to: "/accomplishment", label: "Accomplishment" },
+    ],
+  },
+  {
+    title: "HR Management",
+    items: [
+      { key: "hr", to: "/hr-employees", label: "Employees Info" },
+      { key: "idcard", to: "/id-card", label: "Employee ID" },
+      { key: "attendance", to: "/attendance", label: "Daily Attendance" },
+      { key: "gps", to: "/gps-monitor", label: "GPS Monitoring" },
+      { key: "hrbenefits", to: "/hr-benefits", label: "Benefits & Deductions" },
+      { key: "payroll", to: "/payroll", label: "Payroll" },
+      { key: "coe", to: "/coe", label: "COE" },
+      { key: "myhr", to: "/my-hr", label: "My HR" },
+    ],
+  },
+  {
+    title: "Sales & Customer",
+    items: [
+      { key: "store", to: "/store", label: "Product Store" },
+      { key: "service", to: "/service", label: "Customer Service" },
+    ],
+  },
+  { title: "Reports", items: [{ key: "reports", to: "/reports", label: "Reports" }] },
+  {
+    title: "Settings",
+    items: [
+      { key: "users", to: "/users", label: "User Management" },
+      { key: "backup", to: "/backup", label: "Backup & Data" },
+      { key: "cleaning", to: "/data-cleaning", label: "Data Cleaning" },
+      { key: "branding", to: "/branding", label: "Re-Branding" },
+    ],
+  },
 ];
 
 export function ReportHeader() {
