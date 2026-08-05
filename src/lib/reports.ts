@@ -7,11 +7,88 @@ import defaultLogo from "@/assets/logo.png";
 
 export type Row = Record<string, unknown>;
 
-export function exportExcel(sheetName: string, rows: Row[], fileName: string) {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Info: "No records" }]);
-  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 30));
-  XLSX.writeFile(wb, `${fileName}.xlsx`);
+/* ---------- shared report formatting helpers ---------- */
+
+const isPhoto = (v: unknown) => typeof v === "string" && v.startsWith("data:image");
+
+/** "200 pcs" — qty first, unit after; the standalone unit column is dropped. */
+function mergeQtyUnitObjects(rows: Row[]): Row[] {
+  if (!rows.length) return rows;
+  const keys = Object.keys(rows[0]);
+  const unitKey = keys.find((k) => k.trim().toLowerCase() === "unit");
+  const qtyKey = keys.find((k) => k.trim().toLowerCase() === "qty");
+  if (!unitKey || !qtyKey) return rows;
+  return rows.map((r) => {
+    const out: Row = {};
+    keys.forEach((k) => {
+      if (k === qtyKey) return;
+      if (k === unitKey) out["Qty"] = `${r[qtyKey] ?? 0} ${r[unitKey] ?? ""}`.trim();
+      else out[k] = r[k];
+    });
+    return out;
+  });
+}
+
+/** All reports are sorted A → Z on their printed contents. */
+const sortAZ = <T,>(rows: T[], text: (r: T) => string) =>
+  [...rows].sort((a, b) => text(a).localeCompare(text(b), undefined, { numeric: true }));
+
+function b64parts(data: string) {
+  const comma = data.indexOf(",");
+  return {
+    base64: comma >= 0 ? data.slice(comma + 1) : data,
+    ext: data.includes("image/png") ? ("png" as const) : ("jpeg" as const),
+  };
+}
+
+/** Individual report Excel — pictures are embedded, qty before unit, sorted A→Z. */
+export async function exportExcel(sheetName: string, rows: Row[], fileName: string) {
+  const prepared = sortAZ(mergeQtyUnitObjects(rows), (r) =>
+    Object.values(r)
+      .filter((v) => !isPhoto(v))
+      .join(" ")
+      .toLowerCase(),
+  );
+  const source = prepared.length ? prepared : [{ Info: "No records" } as Row];
+  const keys = Object.keys(source[0]);
+  const photoKeys = keys.filter((k) => source.some((r) => isPhoto(r[k])));
+
+  const { default: ExcelJS } = await import("exceljs");
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(sheetName.slice(0, 30) || "Report");
+  ws.columns = keys.map((k) => ({
+    header: k,
+    key: k,
+    width: photoKeys.includes(k) ? 14 : Math.min(38, Math.max(12, k.length + 6)),
+  }));
+  ws.getRow(1).font = { bold: true };
+
+  source.forEach((r, i) => {
+    const values: Row = {};
+    keys.forEach((k) => (values[k] = photoKeys.includes(k) ? "" : r[k]));
+    const row = ws.addRow(values);
+    if (photoKeys.length) row.height = 70;
+    photoKeys.forEach((k) => {
+      const v = r[k];
+      if (!isPhoto(v)) return;
+      const { base64, ext } = b64parts(v as string);
+      const imgId = wb.addImage({ base64, extension: ext });
+      ws.addImage(imgId, {
+        tl: { col: keys.indexOf(k), row: i + 1 },
+        ext: { width: 88, height: 88 },
+      });
+    });
+  });
+
+  const buf = await wb.xlsx.writeBuffer();
+  const url = URL.createObjectURL(
+    new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+  );
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${fileName}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function exportAllExcel(db: DB = getDB()) {
