@@ -563,12 +563,84 @@ function hydrate(parsed: Partial<DB>): DB {
 
 }
 
+/* ---------- separate JSON files per menu section (still one connected system) ---------- */
+export const SECTION_FIELDS = {
+  main: ["chat"],
+  warehouse: ["modules", "accomplishment"],
+  hr: ["employees", "hrLines", "hrRequests", "payroll", "attendance", "signatures"],
+  sales: ["service", "products", "orders", "withdrawals"],
+  reports: ["docSignatures"],
+  settings: ["branding", "users", "combos", "signatureRecords", "registrations"],
+} as const satisfies Record<string, readonly (keyof DB)[]>;
+
+export type SectionName = keyof typeof SECTION_FIELDS;
+export const SECTION_NAMES = Object.keys(SECTION_FIELDS) as SectionName[];
+const sectionKey = (s: SectionName) => `${KEY}_${s}`;
+
+/** Slice the whole database into its per-section JSON payloads. */
+export function sectionSlice(section: SectionName, db: DB = load()): Partial<DB> {
+  const out: Record<string, unknown> = {};
+  for (const f of SECTION_FIELDS[section]) out[f] = (db as Record<string, unknown>)[f];
+  return out as Partial<DB>;
+}
+
+/** All section files at once: { main: {...}, warehouse: {...}, ... } */
+export function sectionFiles(db: DB = load()): Record<SectionName, Partial<DB>> {
+  return Object.fromEntries(SECTION_NAMES.map((s) => [s, sectionSlice(s, db)])) as Record<
+    SectionName,
+    Partial<DB>
+  >;
+}
+
+/** Merge one or more section files back into the live database (nothing is dropped). */
+export function mergeSections(files: Partial<Record<SectionName, Partial<DB>>>) {
+  setDB((d) => {
+    let next: DB = { ...d };
+    for (const s of SECTION_NAMES) {
+      const part = files[s];
+      if (!part) continue;
+      for (const f of SECTION_FIELDS[s]) {
+        const v = (part as Record<string, unknown>)[f];
+        if (v !== undefined) (next as unknown as Record<string, unknown>)[f] = v;
+      }
+      next = { ...next };
+    }
+    return next;
+  });
+}
+
+function readShards(): Partial<DB> {
+  const merged: Record<string, unknown> = {};
+  for (const s of SECTION_NAMES) {
+    try {
+      const raw = window.localStorage.getItem(sectionKey(s));
+      if (!raw) continue;
+      const part = JSON.parse(raw) as Record<string, unknown>;
+      for (const f of SECTION_FIELDS[s]) if (part[f] !== undefined) merged[f] = part[f];
+    } catch {
+      /* ignore a damaged section — the rest of the data still loads */
+    }
+  }
+  return merged as Partial<DB>;
+}
+
+function writeShards(db: DB) {
+  for (const s of SECTION_NAMES) {
+    try {
+      window.localStorage.setItem(sectionKey(s), JSON.stringify(sectionSlice(s, db)));
+    } catch {
+      /* quota — the master snapshot below still holds everything */
+    }
+  }
+}
+
 function load(): DB {
   if (typeof window === "undefined") return defaultDB();
   if (cache) return cache;
   try {
     const raw = window.localStorage.getItem(KEY);
-    cache = raw ? hydrate(JSON.parse(raw) as Partial<DB>) : defaultDB();
+    const master = raw ? (JSON.parse(raw) as Partial<DB>) : {};
+    cache = hydrate({ ...master, ...readShards() });
   } catch {
     cache = defaultDB();
   }
@@ -578,7 +650,7 @@ function load(): DB {
 /* keep every open tab / user session in sync in real time */
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
-    if (e.key && e.key !== KEY) return;
+    if (e.key && e.key !== KEY && !SECTION_NAMES.some((s) => sectionKey(s) === e.key)) return;
     cache = null;
     load();
     listeners.forEach((l) => l());
@@ -587,7 +659,10 @@ if (typeof window !== "undefined") {
 
 function persist(next: DB) {
   cache = enforceProtectedAccounts(next);
-  if (typeof window !== "undefined") window.localStorage.setItem(KEY, JSON.stringify(cache));
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(KEY, JSON.stringify(cache));
+    writeShards(cache);
+  }
   listeners.forEach((l) => l());
 }
 
