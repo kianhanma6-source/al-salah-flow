@@ -41,14 +41,16 @@ function b64parts(data: string) {
   };
 }
 
-/** Individual report Excel — pictures are embedded, qty before unit, sorted A→Z. */
+/** Individual report Excel — pictures embedded, qty before unit, sorted A→Z (by Model when present). */
 export async function exportExcel(sheetName: string, rows: Row[], fileName: string) {
-  const prepared = sortAZ(mergeQtyUnitObjects(rows), (r) =>
-    Object.values(r)
+  const prepared = sortAZ(mergeQtyUnitObjects(rows), (r) => {
+    const modelKey = Object.keys(r).find((k) => k.trim().toLowerCase() === "model");
+    if (modelKey) return String(r[modelKey] ?? "").toLowerCase();
+    return Object.values(r)
       .filter((v) => !isPhoto(v))
       .join(" ")
-      .toLowerCase(),
-  );
+      .toLowerCase();
+  });
   const source = prepared.length ? prepared : [{ Info: "No records" } as Row];
   const keys = Object.keys(source[0]);
   const photoKeys = keys.filter((k) => source.some((r) => isPhoto(r[k])));
