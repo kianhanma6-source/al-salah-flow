@@ -141,7 +141,7 @@ function BrandingPage() {
               </button>
               <button
                 className="btn-ghost-3d px-2"
-                onClick={() => setForm({ ...form, logoOffsetX: 0, logoOffsetY: 0, logoScale: 1 })}
+                onClick={() => setForm({ ...form, logoOffsetX: 45, logoOffsetY: 0, logoScale: 1 })}
               >
                 Reset
               </button>

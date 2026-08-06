@@ -478,7 +478,7 @@ export const defaultDB = (): DB => ({
     contact: "Contact: +97165443485 / +971547701888",
     email: "Email: info@alhayahalsalah.ae",
     logo: "",
-    logoOffsetX: 0,
+    logoOffsetX: 45,
     logoOffsetY: 0,
     logoScale: 1,
     signatory1: "Prepared by: ______________________",
