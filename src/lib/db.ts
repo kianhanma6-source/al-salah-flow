@@ -580,7 +580,7 @@ const sectionKey = (s: SectionName) => `${KEY}_${s}`;
 /** Slice the whole database into its per-section JSON payloads. */
 export function sectionSlice(section: SectionName, db: DB = load()): Partial<DB> {
   const out: Record<string, unknown> = {};
-  for (const f of SECTION_FIELDS[section]) out[f] = (db as Record<string, unknown>)[f];
+  for (const f of SECTION_FIELDS[section]) out[f] = (db as unknown as Record<string, unknown>)[f];
   return out as Partial<DB>;
 }
 
