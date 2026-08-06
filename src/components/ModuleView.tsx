@@ -184,10 +184,10 @@ export function ModuleView({
     toast.success("Record deleted.");
   };
 
-  /* ---------- filtered lists (auto sort z-a) ---------- */
+  /* ---------- filtered lists (inventory sorts a-z by model, rest z-a) ---------- */
   const invRows = mod.inventory
     .filter((r) => matches(r, invSearch))
-    .sort((a, b) => b.transNo.localeCompare(a.transNo));
+    .sort((a, b) => (a.model || "").localeCompare(b.model || "", undefined, { sensitivity: "base" }));
 
   const depRows = mod.deployment
     .filter((r) => matches(r, depSearch))
