@@ -41,7 +41,8 @@ function b64parts(data: string) {
   };
 }
 
-/** Individual report Excel — pictures embedded, qty before unit, sorted A→Z (by Model when present). */
+/** Individual report Excel — branded header (logo follows the Branding position/scale),
+ *  pictures embedded, qty before unit, sorted A→Z (by Model when present). */
 export async function exportExcel(sheetName: string, rows: Row[], fileName: string) {
   const prepared = sortAZ(mergeQtyUnitObjects(rows), (r) => {
     const modelKey = Object.keys(r).find((k) => k.trim().toLowerCase() === "model");
@@ -55,6 +56,17 @@ export async function exportExcel(sheetName: string, rows: Row[], fileName: stri
   const keys = Object.keys(source[0]);
   const photoKeys = keys.filter((k) => source.some((r) => isPhoto(r[k])));
 
+  const brand = getDB().branding;
+  const headerLines = [
+    brand.companyName,
+    brand.addressLine1,
+    brand.addressLine2,
+    brand.contact,
+    brand.email,
+    sheetName.toUpperCase(),
+  ].filter(Boolean) as string[];
+  const HEAD = headerLines.length + 1; // + blank spacer row
+
   const { default: ExcelJS } = await import("exceljs");
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(sheetName.slice(0, 30) || "Report");
@@ -63,20 +75,58 @@ export async function exportExcel(sheetName: string, rows: Row[], fileName: stri
     key: k,
     width: photoKeys.includes(k) ? 14 : Math.min(38, Math.max(12, k.length + 6)),
   }));
-  ws.getRow(1).font = { bold: true };
 
-  source.forEach((r, i) => {
+  source.forEach((r) => {
     const values: Row = {};
     keys.forEach((k) => (values[k] = photoKeys.includes(k) ? "" : r[k]));
     const row = ws.addRow(values);
     if (photoKeys.length) row.height = 70;
+  });
+
+  // Branded header rows on top (table header row shifts to HEAD + 1).
+  ws.spliceRows(1, 0, ...headerLines.map((t) => [t]), [""]);
+  headerLines.forEach((_t, i) => {
+    const row = ws.getRow(i + 1);
+    row.height = 18;
+    if (keys.length > 1) ws.mergeCells(i + 1, 1, i + 1, keys.length);
+    const cell = ws.getCell(i + 1, 1);
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.font = { bold: i === 0 || i === headerLines.length - 1, size: i === 0 ? 13 : 11 };
+  });
+  ws.getRow(HEAD + 1).font = { bold: true };
+
+  // Logo — same Branding position (mm) and scale used by the PDF reports.
+  const scale = Math.max(0.3, Number(brand.logoScale ?? 1));
+  try {
+    const round = await toReportLogo(brand.logo || defaultLogo, 512, 1);
+    const { base64, ext } = b64parts(round);
+    const logoId = wb.addImage({ base64, extension: ext });
+    const size = 76 * scale;
+    ws.addImage(logoId, {
+      tl: {
+        col: 0,
+        row: 0,
+        nativeCol: 0,
+        nativeRow: 0,
+        nativeColOff: Math.max(0, Number(brand.logoOffsetX ?? 0)) * 36000,
+        nativeRowOff: Math.max(0, Number(brand.logoOffsetY ?? 0)) * 36000,
+      } as never,
+      ext: { width: size, height: size },
+      editAs: "oneCell",
+    });
+  } catch {
+    /* logo optional */
+  }
+
+  // Photos (their rows moved down by the branded header).
+  source.forEach((r, i) => {
     photoKeys.forEach((k) => {
       const v = r[k];
       if (!isPhoto(v)) return;
       const { base64, ext } = b64parts(v as string);
       const imgId = wb.addImage({ base64, extension: ext });
       ws.addImage(imgId, {
-        tl: { col: keys.indexOf(k), row: i + 1 },
+        tl: { col: keys.indexOf(k), row: i + 1 + HEAD },
         ext: { width: 88, height: 88 },
       });
     });
