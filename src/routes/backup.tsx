@@ -38,6 +38,20 @@ function BackupPage() {
   const jsonRef = useRef<HTMLInputElement>(null);
   const xlsRef = useRef<HTMLInputElement>(null);
   const imgXlsRef = useRef<HTMLInputElement>(null);
+  const sectionRef = useRef<HTMLInputElement>(null);
+
+  const downloadSection = (s: SectionName) => {
+    const blob = new Blob([JSON.stringify(sectionSlice(s, getDB()), null, 2)], {
+      type: "application/json",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${s}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+
 
   // Auto-backup once per calendar day.
   useEffect(() => {
