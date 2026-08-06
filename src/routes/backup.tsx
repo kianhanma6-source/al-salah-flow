@@ -4,7 +4,14 @@ import { Database, Download, FileDown, FileSpreadsheet, Upload } from "lucide-re
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Panel } from "@/components/ui-kit";
-import { getDB, useDB } from "@/lib/db";
+import {
+  SECTION_NAMES,
+  getDB,
+  mergeSections,
+  sectionSlice,
+  useDB,
+  type SectionName,
+} from "@/lib/db";
 import { backupJson, exportAllExcel, exportAllPDF, importAllExcel, restoreJson } from "@/lib/reports";
 import { exportAllExcelWithImages, importAllExcelWithImages } from "@/lib/excel-images";
 
@@ -31,6 +38,20 @@ function BackupPage() {
   const jsonRef = useRef<HTMLInputElement>(null);
   const xlsRef = useRef<HTMLInputElement>(null);
   const imgXlsRef = useRef<HTMLInputElement>(null);
+  const sectionRef = useRef<HTMLInputElement>(null);
+
+  const downloadSection = (s: SectionName) => {
+    const blob = new Blob([JSON.stringify(sectionSlice(s, getDB()), null, 2)], {
+      type: "application/json",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${s}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+
 
   // Auto-backup once per calendar day.
   useEffect(() => {
@@ -124,6 +145,53 @@ function BackupPage() {
           }}
         />
       </Panel>
+
+      <Panel title="Section JSON Files (separate files · one connected system)">
+        <p className="mb-3 text-xs text-muted-foreground">
+          Each menu section keeps its own JSON file. Data stays connected — users, permissions and
+          reports work across every file as one system, and nothing is lost on refresh or restart.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {SECTION_NAMES.map((s) => (
+            <button key={s} className="btn-ghost-3d" onClick={() => downloadSection(s)}>
+              <FileDown className="size-4" /> {s}.json
+            </button>
+          ))}
+          <button className="btn-3d" onClick={() => SECTION_NAMES.forEach((s) => downloadSection(s))}>
+            <Database className="size-4" /> Download all section files
+          </button>
+          <button className="btn-3d" onClick={() => sectionRef.current?.click()}>
+            <Upload className="size-4" /> Restore section files
+          </button>
+        </div>
+        <input
+          ref={sectionRef}
+          type="file"
+          accept="application/json"
+          multiple
+          hidden
+          onChange={async (e) => {
+            const files = Array.from(e.target.files ?? []);
+            e.target.value = "";
+            if (!files.length) return;
+            const payload: Partial<Record<SectionName, Record<string, unknown>>> = {};
+            for (const f of files) {
+              const name = f.name.toLowerCase().replace(/\.json$/, "") as SectionName;
+              if (!SECTION_NAMES.includes(name)) continue;
+              try {
+                payload[name] = JSON.parse(await f.text()) as Record<string, unknown>;
+              } catch {
+                toast.error(`Could not read ${f.name}.`);
+              }
+            }
+            const keys = Object.keys(payload);
+            if (!keys.length) return toast.error("No valid section files selected.");
+            mergeSections(payload);
+            toast.success(`Restored: ${keys.join(", ")}`);
+          }}
+        />
+      </Panel>
+
 
       <Panel title="Current Records">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
