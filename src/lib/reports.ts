@@ -342,9 +342,10 @@ export async function exportPDF(
     );
   }
 
-  // reports sort A → Z (photos follow their row)
+  // reports sort A → Z (by Model when the report has a Model column) — photos follow their row
+  const mi = columnsF.findIndex((c) => c.trim().toLowerCase() === "model");
   const order = rowsF
-    .map((r, i) => ({ i, k: r.join(" ").toLowerCase() }))
+    .map((r, i) => ({ i, k: (mi >= 0 ? String(r[mi] ?? "") : r.join(" ")).toLowerCase() }))
     .sort((a, c) => a.k.localeCompare(c.k, undefined, { numeric: true }));
   const sortedRows = order.map((o) => rowsF[o.i]);
   const srcPhotos = photos;
