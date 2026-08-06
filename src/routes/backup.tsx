@@ -169,6 +169,8 @@ function BackupPage() {
             toast.success(`Restored: ${keys.join(", ")}`);
           }}
         />
+      </Panel>
+
 
       <Panel title="Current Records">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
