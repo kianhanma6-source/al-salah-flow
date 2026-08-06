@@ -4,7 +4,14 @@ import { Database, Download, FileDown, FileSpreadsheet, Upload } from "lucide-re
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Panel } from "@/components/ui-kit";
-import { getDB, useDB } from "@/lib/db";
+import {
+  SECTION_NAMES,
+  getDB,
+  mergeSections,
+  sectionSlice,
+  useDB,
+  type SectionName,
+} from "@/lib/db";
 import { backupJson, exportAllExcel, exportAllPDF, importAllExcel, restoreJson } from "@/lib/reports";
 import { exportAllExcelWithImages, importAllExcelWithImages } from "@/lib/excel-images";
 
